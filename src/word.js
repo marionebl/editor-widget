@@ -6,10 +6,13 @@ exports.next = next
 exports.current = current
 exports.wordEnd = wordEnd
 
+function getRegExp(r, flags) {
+  return new RegExp(r instanceof RegExp ? r.source : r, flags)
+}
+
 function prev(string, i, r) {
-  r = r || word
+  r = getRegExp(r || word, 'g')
   r.lastIndex = 0
-  r.global = true
 
   var _m = null, m = null
   do {
@@ -22,9 +25,8 @@ function prev(string, i, r) {
 }
 
 function next (string, i, r) {
-  r = r || word
+  r = getRegExp(r || word, 'g')
   r.lastIndex = i
-  r.global = true
 
   var _m = null, m = null
   do {
@@ -37,9 +39,8 @@ function next (string, i, r) {
 }
 
 function current (string, i, r) {
-  r = r || word
+  r = getRegExp(r || word, 'g')
   r.lastIndex = i
-  r.global = true
   var m
   do {
     m = r.exec(string)

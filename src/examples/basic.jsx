@@ -1,13 +1,10 @@
-# editor-widget [![Build Status](https://travis-ci.org/slap-editor/editor-widget.svg?branch=master)](https://travis-ci.org/slap-editor/editor-widget)
-`<Editor>` component for [react-blessed](https://github.com/Yomguithereal/react-blessed)
+#!/usr/bin/env babel-node
 
-## [src/examples/basic.jsx](src/examples/basic.jsx)
-```js
 import React, {Component} from 'react'
 import blessed from 'blessed'
 import {render} from 'react-blessed'
 
-import {Editor} from 'editor-widget'
+import {Editor} from '..'
 
 export default class EditorExample extends Component {
   componentDidMount () {
@@ -25,4 +22,3 @@ export default class EditorExample extends Component {
 var screen = new blessed.Screen()
 screen.key('C-q', () => { process.exit() })
 render(<EditorExample />, screen)
-```
