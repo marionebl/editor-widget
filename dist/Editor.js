@@ -1,12 +1,13 @@
 'use strict';
 
-var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
-
-var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
-
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+exports.default = undefined;
+
+var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 var _lodash = require('lodash');
 
@@ -34,6 +35,10 @@ var _range = require('text-buffer/lib/range');
 
 var _range2 = _interopRequireDefault(_range);
 
+var _baseWidget = require('base-widget');
+
+var _baseWidget2 = _interopRequireDefault(_baseWidget);
+
 var _slapUtil = require('slap-util');
 
 var _slapUtil2 = _interopRequireDefault(_slapUtil);
@@ -50,9 +55,9 @@ var _client = require('./highlight/client');
 
 var _client2 = _interopRequireDefault(_client);
 
-var _baseWidget = require('base-widget');
+var _Gutter = require('./Gutter');
 
-var _baseWidget2 = _interopRequireDefault(_baseWidget);
+var _Gutter2 = _interopRequireDefault(_Gutter);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -62,12 +67,10 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-if (require('semver').lt(process.version, '4.0.0')) require('iconv-lite').extendNodeEncodings(); // FIXME: destroy this abomination
-
 var fs = _bluebird2.default.promisifyAll(require('fs'));
 var clipboard = _bluebird2.default.promisifyAll(require('copy-paste'));
 
-var Editor = (function (_Component) {
+var Editor = function (_Component) {
   _inherits(Editor, _Component);
 
   _createClass(Editor, [{
@@ -83,7 +86,11 @@ var Editor = (function (_Component) {
   }], [{
     key: 'defaultProps',
     get: function get() {
-      return _lodash2.default.merge({ multiLine: true }, _opts2.default.editor);
+      return _lodash2.default.merge({
+        multiLine: true,
+        clickable: true,
+        keyable: true
+      }, _opts2.default.editor);
     }
   }]);
 
@@ -162,7 +169,7 @@ var Editor = (function (_Component) {
     value: function _initHighlighting() {
       var self = this;
 
-      if (! Editor.count++) Editor.highlightClient = (0, _client2.default)().tap(function (client) {
+      if (!Editor.count++) Editor.highlightClient = (0, _client2.default)().tap(function (client) {
         var loggerOpts = self.props.logger;
         if (loggerOpts) client.send({ type: 'logger', options: loggerOpts });
       });
@@ -306,10 +313,10 @@ var Editor = (function (_Component) {
           var cursor = selection.getHeadPosition();
           var line = this.textBuf.lineForRow(cursor.row);
           var wordMatch = _word2.default[direction === -1 ? 'prev' : 'current'](line, cursor.column);
-          this.moveCursorHorizontal(direction * Math.max(1, ({
+          this.moveCursorHorizontal(direction * Math.max(1, {
             '-1': cursor.column - (wordMatch ? wordMatch.index : 0),
             '1': (wordMatch ? wordMatch.index + wordMatch[0].length : line.length) - cursor.column
-          })[direction]));
+          }[direction]));
         }
       } else {
         var cursor = selection.getHeadPosition().copy();
@@ -545,11 +552,11 @@ var Editor = (function (_Component) {
               } else if (key.name === 'enter') {
                 return; // blessed remaps keys -- ch and key.sequence here are '\r'
               } else if (ch === '\t') {
-                  ch = self._getTabString();
-                } else if (ch === '\x1b') {
-                  // escape
-                  return;
-                }
+                ch = self._getTabString();
+              } else if (ch === '\x1b') {
+                // escape
+                return;
+              }
 
               if (!state.readOnly) {
                 if (selectionRange.isEmpty() && !state.insertMode && !enterPressed) selectionRange.end.column++;
@@ -571,10 +578,10 @@ var Editor = (function (_Component) {
         self._lastMouseData = mouseData;
       });
       if (mouseData.action === 'wheeldown' || mouseData.action === 'wheelup') {
-        self.scroll.row += ({
+        self.scroll.row += {
           wheelup: -1,
           wheeldown: 1
-        })[mouseData.action] * self.props.pageLines;
+        }[mouseData.action] * self.props.pageLines;
         self.clipScroll();
         return;
       }
@@ -706,8 +713,13 @@ var Editor = (function (_Component) {
     value: function render() {
       var self = this;
       var props = self.props;
+      var gutter = props.gutter;
+
 
       var size = self.refs.buffer ? _baseWidget2.default.prototype.size.call(self.refs.buffer) : new _point2.default(1024, 1024);
+
+      var gutterWidth = gutter.visible === false ? 0 : gutter.width;
+
       var scroll = self.scroll;
       var selection = self.selection;
       var selectionRange = selection.getRange();
@@ -723,36 +735,25 @@ var Editor = (function (_Component) {
       var matchStyle = style.match;
       var bracketStyle = matchingBracket && matchingBracket.match ? style.matchingBracket : style.mismatchedBracket;
 
-      var gutterWidth = props.gutter.width;
-      var lineNumberWidth = props.gutter.lineNumberWidth || 0;
       var currentLineStyle = props.gutter.style.currentLine;
 
       var lines = _slapUtil2.default.text.splitLines(_baseWidget2.default.blessed.escape(self.textBuf.getTextInRange({
         start: new _point2.default(scroll.row, 0),
         end: scroll.translate(size)
       })));
+
       return _react2.default.createElement(
         'element',
         { ref: 'root',
-          onKeypress: self.onKeypress.bind(self), keyable: true,
-          onMouse: self.onMouse.bind(self), clickable: true,
+          onKeypress: self.onKeypress.bind(self), keyable: this.props.keyable,
+          onMouse: self.onMouse.bind(self), clickable: this.props.clickable,
           onDetach: self.onDetach.bind(self) },
-        _react2.default.createElement(
-          'box',
-          _extends({ ref: 'gutter' }, props.gutter, {
-            width: gutterWidth,
-            wrap: false,
-            tags: true }),
-          lines.map(function (line, row) {
-            var column = scroll.column;
-            row += scroll.row;
-            var gutterLine = _lodash2.default.padLeft(row + 1, lineNumberWidth) + _lodash2.default.repeat(' ', gutterWidth);
-            if (currentLineStyle && row === visibleCursor.row) {
-              gutterLine = _slapUtil2.default.markup(gutterLine, currentLineStyle);
-            }
-            return gutterLine + '{/}';
-          }).join('\n')
-        ),
+        gutter.hidden === false && _react2.default.createElement(_Gutter2.default, _extends({}, gutter, {
+          width: gutterWidth,
+          offset: scroll.row,
+          active: visibleCursor.row,
+          lines: lines.length
+        })),
         _react2.default.createElement(
           'box',
           _extends({ ref: 'buffer' }, props.buffer, {
@@ -853,9 +854,10 @@ var Editor = (function (_Component) {
   }]);
 
   return Editor;
-})(_react.Component);
+}(_react.Component);
 
 exports.default = Editor;
+
 
 _lodash2.default.merge(Editor, {
   count: 0,

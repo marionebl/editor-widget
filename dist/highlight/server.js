@@ -17,6 +17,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 _highlight2.default.configure({ classPrefix: '' });
 
+
 function highlight(text, language) {
   if (language === false) return [];
 

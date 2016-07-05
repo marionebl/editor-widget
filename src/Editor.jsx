@@ -1,13 +1,14 @@
 'use strict'
-
-import _ from 'lodash'
-import React, {Component} from 'react'
-import Promise from'bluebird'
 import {extname} from 'path'
-if (require('semver').lt(process.version, '4.0.0')) require('iconv-lite').extendNodeEncodings() // FIXME: destroy this abomination
+import React, {Component} from 'react'
+import Promise from 'bluebird';
+import _ from 'lodash';
+import {escape} from 'blessed';
 import TextBuffer from 'text-buffer'
 import Point from 'text-buffer/lib/point'
 import Range from 'text-buffer/lib/range'
+import BaseWidget from 'base-widget'
+import autobind from 'autobind-decorator';
 
 const fs = Promise.promisifyAll(require('fs'))
 const clipboard = Promise.promisifyAll(require('copy-paste'))
@@ -17,7 +18,8 @@ import word from './word'
 import editorWidgetOpts from './opts'
 import highlightClient from './highlight/client'
 
-import BaseWidget from 'base-widget'
+import EditorBuffer from './EditorBuffer';
+import Gutter from './Gutter';
 
 export default class Editor extends Component {
   getInitialState () {
@@ -30,8 +32,14 @@ export default class Editor extends Component {
   }
 
   static get defaultProps () {
-    return _.merge({multiLine: true}, editorWidgetOpts.editor)
+    return _.merge({
+      multiLine: true,
+      clickable: true,
+      keyable: true,
+    }, editorWidgetOpts.editor)
   }
+  
+  references = {};
 
   constructor (props) {
     super(props)
@@ -50,8 +58,8 @@ export default class Editor extends Component {
 
   componentDidMount () {
     var self = this
-    var root = self.refs.root
-    root.focusable = true // for BaseWidget#focusNext
+    const root = this.references.root;
+    // root.focusable = true // for BaseWidget#focusNext
     self._updateCursor()
 
     self.textBuf.onDidChange(() => { self.forceUpdate() })
@@ -94,6 +102,7 @@ export default class Editor extends Component {
 
   _initHighlighting () {
     var self = this
+    const root = this.references.root;
 
     if (!Editor.count++) Editor.highlightClient = highlightClient().tap(client => {
       var loggerOpts = self.props.logger
@@ -103,17 +112,28 @@ export default class Editor extends Component {
     Editor.highlightClient.done(client => {
       self.textBuf.onDidChange(() => { self._requestHighlight() })
       client.once('message', function handleHighlight (highlight) {
-        if (BaseWidget.prototype.isAttached.call(self.refs.root)) client.once('message', handleHighlight)
+        if (root && BaseWidget.prototype.isAttached.call(root)) {
+          client.once('message', handleHighlight);
+        }
         if (
           highlight.bucket === self.state.highlight.bucket &&
-          highlight.revision >= self.state.highlight.revision) self.setState({highlight})
+          highlight.revision >= self.state.highlight.revision) {
+            self.setState({highlight});
+          }
       })
     })
 
     return self
   }
 
-  get screen () { return this.refs.root.screen }
+  get screen () {
+    const root = this.references.root;
+    if (root) {
+      return root.screen;
+    } else {
+      return null;
+    }
+  }
 
   static parseCoordinate (n) { return (parseInt(n, 10) - 1) || 0 }
   static exists (givenPath) {
@@ -188,7 +208,6 @@ export default class Editor extends Component {
       ? _.repeat(' ', this.props.buffer.tabSize)
       : '\t'
   }
-
 
   indent (range, dedent) {
     var self = this
@@ -397,7 +416,8 @@ export default class Editor extends Component {
     return result
   }
 
-  onKeypress (ch, key) {
+  @autobind
+  handleKeypress (ch, key) {
     var self = this
     var state = self.state
     var selection = self.selection
@@ -544,8 +564,12 @@ export default class Editor extends Component {
     }
   }
 
-  onMouse (mouseData) {
-    var self = this
+  @autobind
+  handleMouse (mouseData) {
+    if (!this.references.buffer) {
+      return;
+    }
+    /* var self = this
     process.nextTick(() => { self._lastMouseData = mouseData })
     if (mouseData.action === 'wheeldown' || mouseData.action === 'wheelup') {
       self.scroll.row += {
@@ -557,7 +581,7 @@ export default class Editor extends Component {
     }
 
     var mouse = self.realPos(new Point(mouseData.y, mouseData.x)
-      .translate(BaseWidget.prototype.pos.call(self.refs.buffer).negate())
+      .translate(BaseWidget.prototype.pos.call(this.references.buffer).negate())
       .translate(self.scroll))
 
     var newSelection = self.selection.copy()
@@ -588,10 +612,11 @@ export default class Editor extends Component {
       }
     }
     self.selection.setRange(newSelection.getRange(), {reversed: newSelection.isReversed()})
-    newSelection.destroy()
+    newSelection.destroy() */
   }
 
-  onDetach () {
+  @autobind
+  handleDetach () {
     this.textBuf.destroy()
     this._updateCursor()
 
@@ -608,7 +633,11 @@ export default class Editor extends Component {
   clipScroll (poss) {
     var self = this
 
-    var size = BaseWidget.prototype.size.call(self.refs.buffer)
+    if (!this.references.buffer) {
+      return;
+    }
+
+    var size = BaseWidget.prototype.size.call(this.references.buffer)
     var scroll = (poss || []).reduce((scroll, pos) => {
       var cursorPadding = self.props.buffer.cursorPadding || {}
       var minScroll = pos.translate(size.negate())
@@ -655,17 +684,23 @@ export default class Editor extends Component {
   }
 
   _updateCursor () {
-    var self = this
-    var screen = self.screen
-    if (!screen) return
-    var program = screen.program
-    var buffer = self.refs.buffer
+    const self = this;
+    const {root, buffer} = this.references;
+
+    if (!root || !buffer) {
+      return;
+    }
+
+    const {screen} = root;
+    const {program} = screen;
+
     if (!buffer.visible) {
       program.hideCursor()
       return
     }
+
     var scrollCursor = self.visiblePos(self.selection.getHeadPosition()).translate(self.scroll.negate())
-    if (BaseWidget.prototype.hasFocus.call(self.refs.root) && new Range(
+    if (BaseWidget.prototype.hasFocus.call(root) && new Range(
       new Point(0, 0),
       BaseWidget.prototype.size.call(buffer).translate(new Point(-1, -1))
     ).containsPoint(scrollCursor)) {
@@ -698,109 +733,93 @@ export default class Editor extends Component {
           .replace(/\r/g, '\\r')
        , this.props.style.whiteSpace)
   }
+  
+  reference(name) {
+    return (reference) => {
+      if (reference instanceof Component && reference.references) {
+        this.references[name] = reference.references.root;
+      } else {
+        this.references[name] = reference;
+      }
+    };
+  }
 
   render () {
-    var self = this
-    var props = self.props
+    /* var size = self.refs.buffer
+      ? BaseWidget.prototype.size.call(self.references.buffer)
+      : new Point(1024, 1024) */
 
-    var size = self.refs.buffer
-      ? BaseWidget.prototype.size.call(self.refs.buffer)
-      : new Point(1024, 1024)
-    var scroll = self.scroll
-    var selection = self.selection
-    var selectionRange = selection.getRange()
-    var matchingBracket = self.matchingBracket(selection.getHeadPosition())
-    var cursorOnBracket = selectionRange.isEmpty() && matchingBracket !== undefined
-    var visibleSelection = self.visiblePos(selectionRange)
-    var visibleCursor = visibleSelection[selection.reversed ? 'start' : 'end']
-    var visibleMatchingBracket = selectionRange.isEmpty() && matchingBracket && self.visiblePos(matchingBracket)
+    /* const size = new Point(1024, 1024);
+    const gutterWidth = gutter.hidden === true ? 0 : gutter.width;
 
-    var style = props.style
-    var defaultStyle = style.default
-    var selectionStyle = style.selection
-    var matchStyle = style.match
-    var bracketStyle = matchingBracket && matchingBracket.match ? style.matchingBracket : style.mismatchedBracket
+    const selectionRange = selection.getRange();
+    const matchingBracket = self.matchingBracket(selection.getHeadPosition())
+    const cursorOnBracket = selectionRange.isEmpty() && matchingBracket !== undefined
+    const visibleSelection = self.visiblePos(selectionRange)
+    const visibleCursor = visibleSelection[selection.reversed ? 'start' : 'end']
+    const visibleMatchingBracket = selectionRange.isEmpty() && matchingBracket && self.visiblePos(matchingBracket)
 
-    var gutterWidth = props.gutter.width
-    var lineNumberWidth = props.gutter.lineNumberWidth || 0
-    var currentLineStyle = props.gutter.style.currentLine
+    const style = props.style
+    const defaultStyle = style.default
+    const selectionStyle = style.selection
+    const matchStyle = style.match
+    const bracketStyle = matchingBracket && matchingBracket.match ? style.matchingBracket : style.mismatchedBracket */
 
-    var lines = util.text.splitLines(BaseWidget.blessed.escape(self.textBuf.getTextInRange({
+    const self = this;
+    const props = _.merge({}, Editor.defaultProps, this.props);
+
+    const {
+      scroll,
+      selection
+    } = this;
+
+    const {
+      buffer,
+      gutter,
+      keyable,
+    } = props;
+
+    const size = new Point(1024, 1024);
+    const gutterWidth = gutter.hidden === true ? 0 : gutter.width;
+
+    const cursorType = selection.reversed ? 'start' : 'end';
+    const cursor = this.visiblePos(selection.getRange())[cursorType];
+
+    const text = escape(this.textBuf.getTextInRange({
       start: new Point(scroll.row, 0),
       end: scroll.translate(size)
-    })))
+    }));
+
+    const lines = util.text.splitLines(text);
+
     return (
-      <element ref="root"
-        onKeypress={self.onKeypress.bind(self)} keyable={true}
-        onMouse={self.onMouse.bind(self)} clickable={true}
-        onDetach={self.onDetach.bind(self)}>
-
-        <box ref="gutter" {...props.gutter}
-          width={gutterWidth}
-          wrap={false}
-          tags={true}>
-          {lines.map((line, row) => {
-            var column = scroll.column
-            row += scroll.row
-            var gutterLine = _.padLeft(row + 1, lineNumberWidth) + _.repeat(' ', gutterWidth)
-            if (currentLineStyle && row === visibleCursor.row) {
-              gutterLine = util.markup(gutterLine, currentLineStyle)
-            }
-            return gutterLine + '{/}'
-          }).join('\n')}
-        </box>
-
-        <box ref="buffer" {...props.buffer}
+      <element ref={this.reference('root')}
+        onKeypress={this.handleKeypress}
+        onMouse={this.handleMouse}
+        keyable={keyable}
+        clickable={false}
+        onDetach={this.handleDetach}
+        >
+        {
+          gutter.hidden === false &&
+            <Gutter
+              {...gutter}
+              ref={this.reference('gutter')}
+              width={gutterWidth}
+              offset={this.scroll.row}
+              active={cursor.row}
+              lines={lines.length}
+              />
+        }
+        <EditorBuffer
+          ref={this.reference('buffer')}
           left={gutterWidth}
-          wrap={false}
-          tags={true}>
-          {lines.map((line, row) => {
-            var column = scroll.column
-            row += scroll.row
-            var renderableLineEnding = self._renderableLineEnding((line.match(util.text._lineRegExp) || [''])[0])
-            line = line
-              .replace(/\t+/g, self._renderableTabString.bind(self))
-              .replace(/ +/g, self._renderableSpace.bind(self))
-              .replace(util.text._lineRegExp, renderableLineEnding)
-              .replace(Editor._nonprintableRegExp, '\ufffd')
-            line = util.markup.parse(line)
-              .slice(column, column + size.column)
-              .push(_.repeat(' ', size.column))
-              .tag(defaultStyle)
-            self.textBuf.findMarkers({intersectsRow: row}).sort(Editor.markerCmp).forEach(marker => {
-              var range = self.visiblePos(marker.getRange())
-              if (range.intersectsRow(row)) {
-                var markerStyle
-                switch (marker.properties.type) {
-                  case 'selection': markerStyle = selectionStyle; break
-                  case 'match': case 'findMatch': markerStyle = matchStyle; break
-                  case 'syntax': markerStyle = marker.properties.syntax
-                    .map(syntax => {
-                      if (!(syntax in style)) util.logger.debug("unstyled syntax:", syntax)
-                      return style[syntax] || ''
-                    })
-                    .join(''); break
-                  default: throw new Error("unknown marker: " + marker.properties.type)
-                }
-                line = util.markup(line, markerStyle,
-                  row === range.start.row ? range.start.column - column : 0,
-                  row === range.end.row   ? range.end.column   - column : Infinity)
-              }
-            })
-            if (cursorOnBracket && row === visibleCursor.row) {
-              line = util.markup(line, bracketStyle,
-                visibleCursor.column - column,
-                visibleCursor.column - column + 1)
-            }
-            if (visibleMatchingBracket && row === visibleMatchingBracket.row) {
-              line = util.markup(line, bracketStyle,
-                visibleMatchingBracket.column - column,
-                visibleMatchingBracket.column - column + 1)
-            }
-            return line + '{/}'
-          }).join('\n')}
-        </box>
-
+          offsetX={scroll.column}
+          offsetY={scroll.row}
+          size={size}
+          lines={lines}
+          textBuffer={this.textBuf}
+          />
       </element>
     )
   }
