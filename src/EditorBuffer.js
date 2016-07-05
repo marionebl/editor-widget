@@ -1,13 +1,16 @@
 import React, {Component, PropTypes as t} from 'react'
 import autobind from 'autobind-decorator';
+import pure from 'pure-render-decorator';
+
 import {merge} from 'lodash/fp';
 import {parseTags} from 'blessed';
 import {markup} from 'slap-util'
 
+@pure
 class BufferLine extends Component {
   static propTypes = {
     row: t.number.isRequired,
-    textBuffer: t.any.isRequired,
+    markers: t.array.isRequired,
     children: t.string.isRequired
   };
 
@@ -17,11 +20,9 @@ class BufferLine extends Component {
       column,
       maxWidth,
       row,
-      textBuffer,
+      markers,
       ...props
     } = this.props;
-
-    const markers = textBuffer.findMarkers({intersectsRow: row});
 
     const cropped = children
       .slice(column, column + maxWidth);
@@ -36,6 +37,7 @@ class BufferLine extends Component {
   }
 }
 
+@pure
 class EditorBuffer extends Component {
   static defaultProps = {
     lines: []
@@ -88,14 +90,17 @@ class EditorBuffer extends Component {
         tags={false}
         >
         {
-          lines.map((line, row) => {
+          lines.map((line, y) => {
+            const intersectsRow = y + offsetY;
+            const markers = textBuffer.findMarkers({intersectsRow});
+
             return (
               <BufferLine
-                top={row}
-                row={row + offsetY}
+                top={y}
+                row={intersectsRow}
                 column={offsetX}
                 maxWidth={size.column}
-                textBuffer={textBuffer}
+                markers={markers}
                 >
                 {line}
               </BufferLine>

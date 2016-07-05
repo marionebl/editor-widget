@@ -1,9 +1,11 @@
 import React, {Component} from 'react'
 import {times, merge} from 'lodash/fp';
+import pure from 'pure-render-decorator';
 
 import GutterLine from './GutterLine';
 import {plus} from './utilities/plus';
 
+@pure
 class Gutter extends Component {
   static defaultProps = {
     style: {},
@@ -29,16 +31,15 @@ class Gutter extends Component {
     return (
       <box {...other} wrap={false}>
         {
-          getRange(lines).map((line, offset) => {
+          getRange(lines).map((line, y) => {
             return (
               <GutterLine
                 width={width}
                 style={style}
                 activeStyle={activeStyle}
-                top={offset}
-                active={offset === active}
+                top={y}
+                active={y === active - offset}
                 currentLine={style.currentLine}
-                key={`GutterLine-${line}`}
                 >
                 {line}
               </GutterLine>
