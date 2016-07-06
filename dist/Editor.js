@@ -9,9 +9,9 @@ var _extends = Object.assign || function (target) { for (var i = 1; i < argument
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _lodash = require('lodash');
+var _desc, _value, _class;
 
-var _lodash2 = _interopRequireDefault(_lodash);
+var _path = require('path');
 
 var _react = require('react');
 
@@ -21,7 +21,11 @@ var _bluebird = require('bluebird');
 
 var _bluebird2 = _interopRequireDefault(_bluebird);
 
-var _path = require('path');
+var _lodash = require('lodash');
+
+var _lodash2 = _interopRequireDefault(_lodash);
+
+var _blessed = require('blessed');
 
 var _textBuffer = require('text-buffer');
 
@@ -39,6 +43,10 @@ var _baseWidget = require('base-widget');
 
 var _baseWidget2 = _interopRequireDefault(_baseWidget);
 
+var _autobindDecorator = require('autobind-decorator');
+
+var _autobindDecorator2 = _interopRequireDefault(_autobindDecorator);
+
 var _slapUtil = require('slap-util');
 
 var _slapUtil2 = _interopRequireDefault(_slapUtil);
@@ -55,6 +63,10 @@ var _client = require('./highlight/client');
 
 var _client2 = _interopRequireDefault(_client);
 
+var _EditorBuffer = require('./EditorBuffer');
+
+var _EditorBuffer2 = _interopRequireDefault(_EditorBuffer);
+
 var _Gutter = require('./Gutter');
 
 var _Gutter2 = _interopRequireDefault(_Gutter);
@@ -67,10 +79,39 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
+function _applyDecoratedDescriptor(target, property, decorators, descriptor, context) {
+  var desc = {};
+  Object['ke' + 'ys'](descriptor).forEach(function (key) {
+    desc[key] = descriptor[key];
+  });
+  desc.enumerable = !!desc.enumerable;
+  desc.configurable = !!desc.configurable;
+
+  if ('value' in desc || desc.initializer) {
+    desc.writable = true;
+  }
+
+  desc = decorators.slice().reverse().reduce(function (desc, decorator) {
+    return decorator(target, property, desc) || desc;
+  }, desc);
+
+  if (context && desc.initializer !== void 0) {
+    desc.value = desc.initializer ? desc.initializer.call(context) : void 0;
+    desc.initializer = undefined;
+  }
+
+  if (desc.initializer === void 0) {
+    Object['define' + 'Property'](target, property, desc);
+    desc = null;
+  }
+
+  return desc;
+}
+
 var fs = _bluebird2.default.promisifyAll(require('fs'));
 var clipboard = _bluebird2.default.promisifyAll(require('copy-paste'));
 
-var Editor = function (_Component) {
+var Editor = (_class = function (_Component) {
   _inherits(Editor, _Component);
 
   _createClass(Editor, [{
@@ -99,6 +140,8 @@ var Editor = function (_Component) {
 
     var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(Editor).call(this, props));
 
+    _this.references = {};
+
     _this.state = _this.getInitialState(); // only happens automatically with React.createClass, not JS classes
 
     _this.textBuf = new _textBuffer2.default({ encoding: _this.props.defaultEncoding });
@@ -117,8 +160,8 @@ var Editor = function (_Component) {
     key: 'componentDidMount',
     value: function componentDidMount() {
       var self = this;
-      var root = self.refs.root;
-      root.focusable = true; // for BaseWidget#focusNext
+      var root = this.references.root;
+      // root.focusable = true // for BaseWidget#focusNext
       self._updateCursor();
 
       self.textBuf.onDidChange(function () {
@@ -168,6 +211,7 @@ var Editor = function (_Component) {
     key: '_initHighlighting',
     value: function _initHighlighting() {
       var self = this;
+      var root = this.references.root;
 
       if (!Editor.count++) Editor.highlightClient = (0, _client2.default)().tap(function (client) {
         var loggerOpts = self.props.logger;
@@ -179,8 +223,12 @@ var Editor = function (_Component) {
           self._requestHighlight();
         });
         client.once('message', function handleHighlight(highlight) {
-          if (_baseWidget2.default.prototype.isAttached.call(self.refs.root)) client.once('message', handleHighlight);
-          if (highlight.bucket === self.state.highlight.bucket && highlight.revision >= self.state.highlight.revision) self.setState({ highlight: highlight });
+          if (root && _baseWidget2.default.prototype.isAttached.call(root)) {
+            client.once('message', handleHighlight);
+          }
+          if (highlight.bucket === self.state.highlight.bucket && highlight.revision >= self.state.highlight.revision) {
+            self.setState({ highlight: highlight });
+          }
         });
       });
 
@@ -432,8 +480,8 @@ var Editor = function (_Component) {
       return result;
     }
   }, {
-    key: 'onKeypress',
-    value: function onKeypress(ch, key) {
+    key: 'handleKeypress',
+    value: function handleKeypress(ch, key) {
       var self = this;
       var state = self.state;
       var selection = self.selection;
@@ -571,56 +619,57 @@ var Editor = function (_Component) {
       }
     }
   }, {
-    key: 'onMouse',
-    value: function onMouse(mouseData) {
-      var self = this;
-      process.nextTick(function () {
-        self._lastMouseData = mouseData;
-      });
+    key: 'handleMouse',
+    value: function handleMouse(mouseData) {
+      if (!this.references.buffer) {
+        return;
+      }
+      /* var self = this
+      process.nextTick(() => { self._lastMouseData = mouseData })
       if (mouseData.action === 'wheeldown' || mouseData.action === 'wheelup') {
         self.scroll.row += {
           wheelup: -1,
           wheeldown: 1
-        }[mouseData.action] * self.props.pageLines;
-        self.clipScroll();
-        return;
+        }[mouseData.action] * self.props.pageLines
+        self.clipScroll()
+        return
       }
-
-      var mouse = self.realPos(new _point2.default(mouseData.y, mouseData.x).translate(_baseWidget2.default.prototype.pos.call(self.refs.buffer).negate()).translate(self.scroll));
-
-      var newSelection = self.selection.copy();
-      if (mouseData.action === 'mouseup') self.lastClick = { mouse: mouse, time: Date.now() };
+       var mouse = self.realPos(new Point(mouseData.y, mouseData.x)
+        .translate(BaseWidget.prototype.pos.call(this.references.buffer).negate())
+        .translate(self.scroll))
+       var newSelection = self.selection.copy()
+      if (mouseData.action === 'mouseup') self.lastClick = {mouse: mouse, time: Date.now()}
       if (mouseData.action === 'mousedown') {
-        var lastClick = self.lastClick;
+        var lastClick = self.lastClick
         if (lastClick && mouse.isEqual(lastClick.mouse) && lastClick.time + self.props.doubleClickDuration > Date.now()) {
-          self.lastClick = null;
-          var line = self.textBuf.lineForRow(mouse.row);
-          var startX = mouse.column;
-          var endX = mouse.column + 1;
-          var prev = _word2.default.prev(line, mouse.column);
-          var current = _word2.default.current(line, mouse.column);
+          self.lastClick = null
+          var line = self.textBuf.lineForRow(mouse.row)
+          var startX = mouse.column
+          var endX = mouse.column + 1
+          var prev = word.prev(line, mouse.column)
+          var current = word.current(line, mouse.column)
           if (current) {
             if (prev && current.index < prev.index + prev[0].length) {
-              startX = prev.index;
-              endX = prev.index + prev[0].length;
+              startX = prev.index
+              endX = prev.index + prev[0].length
             } else if (current.index <= mouse.column && mouse.column < current.index + current[0].length) {
-              startX = current.index;
-              endX = current.index + current[0].length;
+              startX = current.index
+              endX = current.index + current[0].length
             }
           }
-          newSelection.setRange(new _range2.default(new _point2.default(mouse.row, startX), new _point2.default(mouse.row, endX)));
+          newSelection.setRange(new Range(new Point(mouse.row, startX), new Point(mouse.row, endX)))
         } else {
-          if ((self._lastMouseData || {}).action !== 'mousedown' && !mouseData.shift) newSelection.clearTail();
-          newSelection.setHeadPosition(mouse);
-          newSelection.plantTail();
+          if ((self._lastMouseData || {}).action !== 'mousedown' && !mouseData.shift) newSelection.clearTail()
+          newSelection.setHeadPosition(mouse)
+          newSelection.plantTail()
         }
       }
-      self.selection.setRange(newSelection.getRange(), { reversed: newSelection.isReversed() });
-      newSelection.destroy();
+      self.selection.setRange(newSelection.getRange(), {reversed: newSelection.isReversed()})
+      newSelection.destroy() */
     }
   }, {
-    key: 'onDetach',
-    value: function onDetach() {
+    key: 'handleDetach',
+    value: function handleDetach() {
       this.textBuf.destroy();
       this._updateCursor();
 
@@ -636,7 +685,11 @@ var Editor = function (_Component) {
     value: function clipScroll(poss) {
       var self = this;
 
-      var size = _baseWidget2.default.prototype.size.call(self.refs.buffer);
+      if (!this.references.buffer) {
+        return;
+      }
+
+      var size = _baseWidget2.default.prototype.size.call(this.references.buffer);
       var scroll = (poss || []).reduce(function (scroll, pos) {
         var cursorPadding = self.props.buffer.cursorPadding || {};
         var minScroll = pos.translate(size.negate()).translate(new _point2.default((cursorPadding.right || 0) + 1, (cursorPadding.bottom || 0) + 1));
@@ -676,16 +729,26 @@ var Editor = function (_Component) {
     key: '_updateCursor',
     value: function _updateCursor() {
       var self = this;
-      var screen = self.screen;
-      if (!screen) return;
+      var _references = this.references;
+      var root = _references.root;
+      var buffer = _references.buffer;
+
+
+      if (!root || !buffer) {
+        return;
+      }
+
+      var screen = root.screen;
       var program = screen.program;
-      var buffer = self.refs.buffer;
+
+
       if (!buffer.visible) {
         program.hideCursor();
         return;
       }
+
       var scrollCursor = self.visiblePos(self.selection.getHeadPosition()).translate(self.scroll.negate());
-      if (_baseWidget2.default.prototype.hasFocus.call(self.refs.root) && new _range2.default(new _point2.default(0, 0), _baseWidget2.default.prototype.size.call(buffer).translate(new _point2.default(-1, -1))).containsPoint(scrollCursor)) {
+      if (_baseWidget2.default.prototype.hasFocus.call(root) && new _range2.default(new _point2.default(0, 0), _baseWidget2.default.prototype.size.call(buffer).translate(new _point2.default(-1, -1))).containsPoint(scrollCursor)) {
         var screenCursor = scrollCursor.translate(_baseWidget2.default.prototype.pos.call(buffer));
         program.move(screenCursor.column, screenCursor.row);
         program.showCursor();
@@ -709,98 +772,98 @@ var Editor = function (_Component) {
       return !this.props.buffer.visibleLineEndings ? '' : _slapUtil2.default.markup(lineEnding.replace(/\n/g, '\\n').replace(/\r/g, '\\r'), this.props.style.whiteSpace);
     }
   }, {
+    key: 'reference',
+    value: function reference(name) {
+      var _this2 = this;
+
+      return function (reference) {
+        if (reference instanceof _react.Component && reference.references) {
+          _this2.references[name] = reference.references.root;
+        } else {
+          _this2.references[name] = reference;
+        }
+      };
+    }
+  }, {
     key: 'render',
     value: function render() {
+      /* var size = self.refs.buffer
+        ? BaseWidget.prototype.size.call(self.references.buffer)
+        : new Point(1024, 1024) */
+
+      /* const size = new Point(1024, 1024);
+      const gutterWidth = gutter.hidden === true ? 0 : gutter.width;
+       const selectionRange = selection.getRange();
+      const matchingBracket = self.matchingBracket(selection.getHeadPosition())
+      const cursorOnBracket = selectionRange.isEmpty() && matchingBracket !== undefined
+      const visibleSelection = self.visiblePos(selectionRange)
+      const visibleCursor = visibleSelection[selection.reversed ? 'start' : 'end']
+      const visibleMatchingBracket = selectionRange.isEmpty() && matchingBracket && self.visiblePos(matchingBracket)
+       const style = props.style
+      const defaultStyle = style.default
+      const selectionStyle = style.selection
+      const matchStyle = style.match
+      const bracketStyle = matchingBracket && matchingBracket.match ? style.matchingBracket : style.mismatchedBracket */
+
       var self = this;
-      var props = self.props;
+      var props = _lodash2.default.merge({}, Editor.defaultProps, this.props);
+
+      var scroll = this.scroll;
+      var selection = this.selection;
+      var buffer = props.buffer;
       var gutter = props.gutter;
+      var keyable = props.keyable;
 
 
-      var size = self.refs.buffer ? _baseWidget2.default.prototype.size.call(self.refs.buffer) : new _point2.default(1024, 1024);
+      var size = new _point2.default(1024, 1024);
+      var gutterWidth = gutter.hidden === true ? 0 : gutter.width;
 
-      var gutterWidth = gutter.visible === false ? 0 : gutter.width;
+      var cursorType = selection.reversed ? 'start' : 'end';
+      var cursor = this.visiblePos(selection.getRange())[cursorType];
 
-      var scroll = self.scroll;
-      var selection = self.selection;
-      var selectionRange = selection.getRange();
-      var matchingBracket = self.matchingBracket(selection.getHeadPosition());
-      var cursorOnBracket = selectionRange.isEmpty() && matchingBracket !== undefined;
-      var visibleSelection = self.visiblePos(selectionRange);
-      var visibleCursor = visibleSelection[selection.reversed ? 'start' : 'end'];
-      var visibleMatchingBracket = selectionRange.isEmpty() && matchingBracket && self.visiblePos(matchingBracket);
-
-      var style = props.style;
-      var defaultStyle = style.default;
-      var selectionStyle = style.selection;
-      var matchStyle = style.match;
-      var bracketStyle = matchingBracket && matchingBracket.match ? style.matchingBracket : style.mismatchedBracket;
-
-      var currentLineStyle = props.gutter.style.currentLine;
-
-      var lines = _slapUtil2.default.text.splitLines(_baseWidget2.default.blessed.escape(self.textBuf.getTextInRange({
+      var text = (0, _blessed.escape)(this.textBuf.getTextInRange({
         start: new _point2.default(scroll.row, 0),
         end: scroll.translate(size)
-      })));
+      }));
+
+      var lines = _slapUtil2.default.text.splitLines(text);
 
       return _react2.default.createElement(
         'element',
-        { ref: 'root',
-          onKeypress: self.onKeypress.bind(self), keyable: this.props.keyable,
-          onMouse: self.onMouse.bind(self), clickable: this.props.clickable,
-          onDetach: self.onDetach.bind(self) },
+        { ref: this.reference('root'),
+          onKeypress: this.handleKeypress,
+          onMouse: this.handleMouse,
+          keyable: keyable,
+          clickable: false,
+          onDetach: this.handleDetach
+        },
         gutter.hidden === false && _react2.default.createElement(_Gutter2.default, _extends({}, gutter, {
+          ref: this.reference('gutter'),
           width: gutterWidth,
-          offset: scroll.row,
-          active: visibleCursor.row,
+          offset: this.scroll.row,
+          active: cursor.row,
           lines: lines.length
         })),
-        _react2.default.createElement(
-          'box',
-          _extends({ ref: 'buffer' }, props.buffer, {
-            left: gutterWidth,
-            wrap: false,
-            tags: true }),
-          lines.map(function (line, row) {
-            var column = scroll.column;
-            row += scroll.row;
-            var renderableLineEnding = self._renderableLineEnding((line.match(_slapUtil2.default.text._lineRegExp) || [''])[0]);
-            line = line.replace(/\t+/g, self._renderableTabString.bind(self)).replace(/ +/g, self._renderableSpace.bind(self)).replace(_slapUtil2.default.text._lineRegExp, renderableLineEnding).replace(Editor._nonprintableRegExp, '�');
-            line = _slapUtil2.default.markup.parse(line).slice(column, column + size.column).push(_lodash2.default.repeat(' ', size.column)).tag(defaultStyle);
-            self.textBuf.findMarkers({ intersectsRow: row }).sort(Editor.markerCmp).forEach(function (marker) {
-              var range = self.visiblePos(marker.getRange());
-              if (range.intersectsRow(row)) {
-                var markerStyle;
-                switch (marker.properties.type) {
-                  case 'selection':
-                    markerStyle = selectionStyle;break;
-                  case 'match':case 'findMatch':
-                    markerStyle = matchStyle;break;
-                  case 'syntax':
-                    markerStyle = marker.properties.syntax.map(function (syntax) {
-                      if (!(syntax in style)) _slapUtil2.default.logger.debug("unstyled syntax:", syntax);
-                      return style[syntax] || '';
-                    }).join('');break;
-                  default:
-                    throw new Error("unknown marker: " + marker.properties.type);
-                }
-                line = _slapUtil2.default.markup(line, markerStyle, row === range.start.row ? range.start.column - column : 0, row === range.end.row ? range.end.column - column : Infinity);
-              }
-            });
-            if (cursorOnBracket && row === visibleCursor.row) {
-              line = _slapUtil2.default.markup(line, bracketStyle, visibleCursor.column - column, visibleCursor.column - column + 1);
-            }
-            if (visibleMatchingBracket && row === visibleMatchingBracket.row) {
-              line = _slapUtil2.default.markup(line, bracketStyle, visibleMatchingBracket.column - column, visibleMatchingBracket.column - column + 1);
-            }
-            return line + '{/}';
-          }).join('\n')
-        )
+        _react2.default.createElement(_EditorBuffer2.default, {
+          ref: this.reference('buffer'),
+          left: gutterWidth,
+          offsetX: scroll.column,
+          offsetY: scroll.row,
+          size: size,
+          lines: lines,
+          textBuffer: this.textBuf
+        })
       );
     }
   }, {
     key: 'screen',
     get: function get() {
-      return this.refs.root.screen;
+      var root = this.references.root;
+      if (root) {
+        return root.screen;
+      } else {
+        return null;
+      }
     }
   }], [{
     key: 'parseCoordinate',
@@ -854,8 +917,7 @@ var Editor = function (_Component) {
   }]);
 
   return Editor;
-}(_react.Component);
-
+}(_react.Component), (_applyDecoratedDescriptor(_class.prototype, 'handleKeypress', [_autobindDecorator2.default], Object.getOwnPropertyDescriptor(_class.prototype, 'handleKeypress'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'handleMouse', [_autobindDecorator2.default], Object.getOwnPropertyDescriptor(_class.prototype, 'handleMouse'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'handleDetach', [_autobindDecorator2.default], Object.getOwnPropertyDescriptor(_class.prototype, 'handleDetach'), _class.prototype)), _class);
 exports.default = Editor;
 
 

@@ -110,14 +110,15 @@ global.screen = screen;
 
 var props = {
   gutter: {
-    width: 3,
     hidden: false,
+    width: 4,
     style: {
       bg: 'transparent',
-      fg: 'grey',
-      activeLine: {
-        fg: 'white'
-      }
+      fg: 'grey'
+    },
+    activeStyle: {
+      bg: 'transparent',
+      fg: 'white'
     }
   }
 };
