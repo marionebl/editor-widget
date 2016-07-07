@@ -2,11 +2,11 @@ import minus from './minus';
 import plus from './plus';
 
 export {
-  minus,
-  plus
-}
+	minus,
+	plus
+};
 
 export default {
-  minus,
-  plus
-}
+	minus,
+	plus
+};
