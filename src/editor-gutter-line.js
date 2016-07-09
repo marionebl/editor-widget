@@ -9,15 +9,14 @@ import deep from './utilities/deep-defaults';
 @autobind
 class EditorGutterLine extends Component {
 	static defaultProps = {
+		align: 'right',
 		children: '',
-		lineNumberWidth: 0,
 		style: {
-			fg: 'white',
-			bg: 'blue'
+			fg: 'grey'
 		},
 		activeStyle: {
-			fg: 'black',
-			bg: 'white'
+			fg: 'white',
+			bold: true
 		}
 	};
 

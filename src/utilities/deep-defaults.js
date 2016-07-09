@@ -31,7 +31,7 @@ export function deepDefaultsDecorator(ComponentDefinition) {
 		descriptors.componentWillReceiveProps = {
 			value(nextProps) {
 				const merged = mergeDefaultProps(nextProps);
-				return componentWillReceiveProps(merged);
+				return this::componentWillReceiveProps(merged);
 			}
 		};
 	}
@@ -40,7 +40,7 @@ export function deepDefaultsDecorator(ComponentDefinition) {
 		descriptors.shouldComponentUpdate = {
 			value(nextProps, nextState) {
 				const merged = mergeDefaultProps(nextProps);
-				return shouldComponentUpdate(merged, nextState);
+				return this::shouldComponentUpdate(merged, nextState);
 			}
 		};
 	}
@@ -49,7 +49,7 @@ export function deepDefaultsDecorator(ComponentDefinition) {
 		descriptors.componentWillUpdate = {
 			value(nextProps, nextState) {
 				const merged = mergeDefaultProps(nextProps);
-				return componentWillUpdate(merged, nextState);
+				return this::componentWillUpdate(merged, nextState);
 			}
 		};
 	}
@@ -58,7 +58,7 @@ export function deepDefaultsDecorator(ComponentDefinition) {
 		descriptors.render = {
 			value() {
 				const merged = mergeDefaultProps(this.props);
-				return render(merged, this.state);
+				return this::render(merged, this.state);
 			}
 		};
 	}

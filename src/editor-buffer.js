@@ -1,10 +1,9 @@
 import React, {Component, PropTypes as t} from 'react';
+import {highlightAuto} from 'emphasize';
 import autobind from 'autobind-decorator';
 import pure from 'pure-render-decorator';
+
 import deep from './utilities/deep-defaults';
-
-import {merge} from 'lodash/fp';
-
 import EditorBufferLine from './editor-buffer-line';
 
 @pure
@@ -15,7 +14,7 @@ export class EditorBuffer extends Component {
 	};
 
 	static propTypes = {
-		textBuffer: t.any.isRequired,
+		children: t.string,
 		lines: t.arrayOf(t.string).isRequired
 	};
 
@@ -32,14 +31,16 @@ export class EditorBuffer extends Component {
 		};
 	}
 
-	render() {
-		const props = merge(EditorBuffer.defaultProps)(this.props);
+	render(props) {
 		const {
-			lines,
+			children,
 			offsetX,
 			offsetY,
 			size
 		} = props;
+
+		// const {value: content} = highlightAuto(children);
+		const lines = children.split('\n');
 
 		return (
 			<box
@@ -58,7 +59,6 @@ export class EditorBuffer extends Component {
 								key={y}
 								row={intersectsRow}
 								column={offsetX}
-								maxWidth={size.column}
 								>
 								{line}
 							</EditorBufferLine>

@@ -9,28 +9,18 @@ import {parseTags} from 'blessed';
 class EditorBufferLine extends Component {
 	static propTypes = {
 		row: t.number.isRequired,
-		markers: t.array.isRequired,
-		maxWidth: t.number.isRequired,
-		column: t.number.isRequired,
 		children: t.string.isRequired
 	};
 
 	render() {
 		const {
 			children,
-			column,
-			maxWidth,
 			...props
 		} = this.props;
 
-		const cropped = children
-			.slice(column, column + maxWidth);
-
-		const content = parseTags(`${cropped}${' '.repeat(maxWidth)}`);
-
 		return (
 			<box {...props}>
-				{content}
+				{children}
 			</box>
 		);
 	}
