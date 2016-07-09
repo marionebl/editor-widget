@@ -1,7 +1,7 @@
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
-  value: true
+	value: true
 });
 exports.plus = exports.minus = undefined;
 
@@ -18,6 +18,6 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 exports.minus = _minus2.default;
 exports.plus = _plus2.default;
 exports.default = {
-  minus: _minus2.default,
-  plus: _plus2.default
+	minus: _minus2.default,
+	plus: _plus2.default
 };

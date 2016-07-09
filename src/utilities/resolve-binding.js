@@ -1,9 +1,11 @@
+import {entries} from 'lodash';
+
 export function resolveBinding(name, bindings) {
 	if (!name) {
 		return;
 	}
 
-	const matches = Object.entries(bindings)
+	const matches = entries(bindings)
 		.reduce((registry, entry) => {
 			const [binding, names] = entry;
 			if (names.includes(name)) {

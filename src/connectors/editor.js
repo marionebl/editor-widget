@@ -91,10 +91,13 @@ export function editorMapDispatch(dispatch) {
 				payload: editorMapPayload(props)
 			});
 		},
-		onInsertion(props) {
+		onInsertion(value, {cursor}) {
 			dispatch({
 				type: actions.EDIT_INSERT,
-				payload: editorMapPayload(props)
+				payload: {
+					value,
+					cursor
+				}
 			});
 		}
 	};

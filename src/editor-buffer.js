@@ -35,11 +35,10 @@ export class EditorBuffer extends Component {
 		const {
 			children,
 			offsetX,
-			offsetY,
-			size
+			offsetY
 		} = props;
 
-		// const {value: content} = highlightAuto(children);
+		const {value: content} = highlightAuto(children);
 		const lines = children.split('\n');
 
 		return (

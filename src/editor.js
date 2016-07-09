@@ -213,6 +213,7 @@ export class Editor extends Component {
 
 	handleInsertion(value) {
 		this.props.onInsertion(value, this.props);
+		this.props.onGoRight(this.props);
 	}
 
 	handleInput(value, character) {

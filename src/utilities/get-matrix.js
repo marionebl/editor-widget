@@ -1,10 +1,9 @@
 export function getMatrix(text) {
 	if (typeof text !== 'string') {
-		return [];
+		return [''];
 	}
 
-	const sanitized = text.replace(/\t/g, '    ');
-	return sanitized.split('\n').map(line => line.split(''));
+	return text.split(/\n/g);
 }
 
 export default getMatrix;

@@ -1,77 +1,75 @@
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
-  value: true
+	value: true
 });
-exports.default = undefined;
+exports.Editor = undefined;
 
 var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _desc, _value, _class;
-
-var _path = require('path');
+var _class, _class2, _temp2;
 
 var _react = require('react');
 
 var _react2 = _interopRequireDefault(_react);
 
-var _bluebird = require('bluebird');
-
-var _bluebird2 = _interopRequireDefault(_bluebird);
-
-var _lodash = require('lodash');
-
-var _lodash2 = _interopRequireDefault(_lodash);
-
-var _blessed = require('blessed');
-
-var _textBuffer = require('text-buffer');
-
-var _textBuffer2 = _interopRequireDefault(_textBuffer);
-
-var _point = require('text-buffer/lib/point');
-
-var _point2 = _interopRequireDefault(_point);
-
-var _range = require('text-buffer/lib/range');
-
-var _range2 = _interopRequireDefault(_range);
-
-var _baseWidget = require('base-widget');
-
-var _baseWidget2 = _interopRequireDefault(_baseWidget);
-
 var _autobindDecorator = require('autobind-decorator');
 
 var _autobindDecorator2 = _interopRequireDefault(_autobindDecorator);
 
-var _slapUtil = require('slap-util');
+var _pureRenderDecorator = require('pure-render-decorator');
 
-var _slapUtil2 = _interopRequireDefault(_slapUtil);
+var _pureRenderDecorator2 = _interopRequireDefault(_pureRenderDecorator);
 
-var _word = require('./word');
+var _fp = require('lodash/fp');
 
-var _word2 = _interopRequireDefault(_word);
+var _redux = require('redux');
 
-var _opts = require('./opts');
+var _deepDefaults = require('./utilities/deep-defaults');
 
-var _opts2 = _interopRequireDefault(_opts);
+var _deepDefaults2 = _interopRequireDefault(_deepDefaults);
 
-var _client = require('./highlight/client');
+var _getMatrix = require('./utilities/get-matrix');
 
-var _client2 = _interopRequireDefault(_client);
+var _getMatrix2 = _interopRequireDefault(_getMatrix);
 
-var _EditorBuffer = require('./EditorBuffer');
+var _getMatrixLine = require('./utilities/get-matrix-line');
 
-var _EditorBuffer2 = _interopRequireDefault(_EditorBuffer);
+var _getMatrixLine2 = _interopRequireDefault(_getMatrixLine);
 
-var _Gutter = require('./Gutter');
+var _getMatrixCharacter = require('./utilities/get-matrix-character');
 
-var _Gutter2 = _interopRequireDefault(_Gutter);
+var _getMatrixCharacter2 = _interopRequireDefault(_getMatrixCharacter);
+
+var _resolveBinding = require('./utilities/resolve-binding');
+
+var _resolveBinding2 = _interopRequireDefault(_resolveBinding);
+
+var _editorBuffer = require('./editor-buffer');
+
+var _editorBuffer2 = _interopRequireDefault(_editorBuffer);
+
+var _editorCursor = require('./editor-cursor');
+
+var _editorCursor2 = _interopRequireDefault(_editorCursor);
+
+var _editorGutter = require('./editor-gutter');
+
+var _editorGutter2 = _interopRequireDefault(_editorGutter);
+
+var _reducers = require('./reducers');
+
+var _reducers2 = _interopRequireDefault(_reducers);
+
+var _editor = require('./connectors/editor');
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _objectWithoutProperties(obj, keys) { var target = {}; for (var i in obj) { if (keys.indexOf(i) >= 0) continue; if (!Object.prototype.hasOwnProperty.call(obj, i)) continue; target[i] = obj[i]; } return target; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -79,857 +77,318 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-function _applyDecoratedDescriptor(target, property, decorators, descriptor, context) {
-  var desc = {};
-  Object['ke' + 'ys'](descriptor).forEach(function (key) {
-    desc[key] = descriptor[key];
-  });
-  desc.enumerable = !!desc.enumerable;
-  desc.configurable = !!desc.configurable;
+var Editor = exports.Editor = (0, _pureRenderDecorator2.default)(_class = (0, _deepDefaults2.default)(_class = (0, _autobindDecorator2.default)(_class = (_temp2 = _class2 = function (_Component) {
+	_inherits(Editor, _Component);
 
-  if ('value' in desc || desc.initializer) {
-    desc.writable = true;
-  }
+	function Editor() {
+		var _Object$getPrototypeO;
 
-  desc = decorators.slice().reverse().reduce(function (desc, decorator) {
-    return decorator(target, property, desc) || desc;
-  }, desc);
+		var _temp, _this, _ret;
 
-  if (context && desc.initializer !== void 0) {
-    desc.value = desc.initializer ? desc.initializer.call(context) : void 0;
-    desc.initializer = undefined;
-  }
+		_classCallCheck(this, Editor);
 
-  if (desc.initializer === void 0) {
-    Object['define' + 'Property'](target, property, desc);
-    desc = null;
-  }
+		for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
+			args[_key] = arguments[_key];
+		}
 
-  return desc;
-}
-
-var fs = _bluebird2.default.promisifyAll(require('fs'));
-var clipboard = _bluebird2.default.promisifyAll(require('copy-paste'));
-
-var Editor = (_class = function (_Component) {
-  _inherits(Editor, _Component);
-
-  _createClass(Editor, [{
-    key: 'getInitialState',
-    value: function getInitialState() {
-      return {
-        insertMode: true,
-        language: false,
-        readOnly: false,
-        highlight: { ranges: [], revision: 0, bucket: _client2.default.getBucket() }
-      };
-    }
-  }], [{
-    key: 'defaultProps',
-    get: function get() {
-      return _lodash2.default.merge({
-        multiLine: true,
-        clickable: true,
-        keyable: true
-      }, _opts2.default.editor);
-    }
-  }]);
-
-  function Editor(props) {
-    _classCallCheck(this, Editor);
-
-    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(Editor).call(this, props));
-
-    _this.references = {};
-
-    _this.state = _this.getInitialState(); // only happens automatically with React.createClass, not JS classes
-
-    _this.textBuf = new _textBuffer2.default({ encoding: _this.props.defaultEncoding });
-    _this.textBuf.loadSync();
-    if (_this.props.children) _this.textBuf.setText(_this.props.children);
-
-    _this.selection = _this.textBuf.markPosition(new _point2.default(0, 0), { type: 'selection', invalidate: 'never' });
-    _this.scroll = new _point2.default(0, 0);
-    _this.updatePreferredX = true;
-
-    _this._initHighlighting();
-    return _this;
-  }
-
-  _createClass(Editor, [{
-    key: 'componentDidMount',
-    value: function componentDidMount() {
-      var self = this;
-      var root = this.references.root;
-      // root.focusable = true // for BaseWidget#focusNext
-      self._updateCursor();
-
-      self.textBuf.onDidChange(function () {
-        self.forceUpdate();
-      });
-      self.textBuf.onDidChangePath(function () {
-        self.setState({ language: (0, _path.extname)(self.textBuf.getPath()).slice(1) });
-      });
-
-      var selection = self.selection;
-      selection.onDidChange(function () {
-        var cursor = self.visiblePos(selection.getHeadPosition());
-        if (self.updatePreferredX) self.preferredCursorX = cursor.column; // preferred X when moving vertically
-        self._markMatches();
-        self.clipScroll([cursor]);
-      });
-
-      _baseWidget2.default.prototype._initHandlers.apply(root, arguments);
-    }
-  }, {
-    key: 'componentWillUpdate',
-    value: function componentWillUpdate(props, state) {
-      var self = this;
-      self._updateCursor();
-
-      self.destroyMarkers({ type: 'syntax' });
-      if (state) state.highlight.ranges.forEach(function (range) {
-        self.textBuf.markRange(range.range, range.properties);
-      });
-    }
-  }, {
-    key: '_requestHighlight',
-    value: function _requestHighlight() {
-      if (this.props.highlight) {
-        var highlight = this.state.highlight;
-        highlight.revision++;
-        Editor.highlightClient.call('send', {
-          type: 'highlight',
-          text: this.textBuf.getText(),
-          language: this.state.language,
-          revision: highlight.revision,
-          bucket: highlight.bucket
-        }).done();
-      }
-    }
-  }, {
-    key: '_initHighlighting',
-    value: function _initHighlighting() {
-      var self = this;
-      var root = this.references.root;
-
-      if (!Editor.count++) Editor.highlightClient = (0, _client2.default)().tap(function (client) {
-        var loggerOpts = self.props.logger;
-        if (loggerOpts) client.send({ type: 'logger', options: loggerOpts });
-      });
-
-      Editor.highlightClient.done(function (client) {
-        self.textBuf.onDidChange(function () {
-          self._requestHighlight();
-        });
-        client.once('message', function handleHighlight(highlight) {
-          if (root && _baseWidget2.default.prototype.isAttached.call(root)) {
-            client.once('message', handleHighlight);
-          }
-          if (highlight.bucket === self.state.highlight.bucket && highlight.revision >= self.state.highlight.revision) {
-            self.setState({ highlight: highlight });
-          }
-        });
-      });
-
-      return self;
-    }
-  }, {
-    key: 'open',
-    value: function open(givenPath) {
-      // Handles nonexistent paths
-      var self = this;
-      return Editor.getOpenParams(givenPath).tap(function (params) {
-        return self.textBuf.setPath(params.path);
-      }).tap(function (params) {
-        if (params.exists) return self.textBuf.load();
-      }).tap(function (params) {
-        self.selection.setHeadPosition(params.position);
-      }).return(self);
-    }
-  }, {
-    key: 'save',
-    value: function save(path) {
-      var self = this;
-      var args = arguments;
-      return _bluebird2.default.try(function () {
-        return path ? self.textBuf.saveAs(_slapUtil2.default.resolvePath.apply(null, args)) : self.textBuf.save();
-      }).then(function () {
-        return self.textBuf.getPath();
-      });
-    }
-  }, {
-    key: 'lineWithEndingForRow',
-    value: function lineWithEndingForRow(row) {
-      return this.textBuf.lineForRow(row) + this.textBuf.lineEndingForRow(row);
-    }
-  }, {
-    key: 'delete',
-    value: function _delete(range) {
-      this.textBuf.delete(range || this.selection.getRange());
-      return this;
-    }
-  }, {
-    key: '_getTabString',
-    value: function _getTabString() {
-      return this.props.buffer.useSpaces ? _lodash2.default.repeat(' ', this.props.buffer.tabSize) : '\t';
-    }
-  }, {
-    key: 'indent',
-    value: function indent(range, dedent) {
-      var self = this;
-
-      var tabString = self._getTabString();
-      var indentRegex = new RegExp('^(\t| {0,' + self.props.buffer.tabSize + '})', 'g');
-      var startDiff = 0,
-          endDiff = 0;
-      var linesRange = range.copy();
-      linesRange.start.column = 0;
-      linesRange.end.column = Infinity;
-      self.textBuf.setTextInRange(linesRange, _slapUtil2.default.text.splitLines(self.textBuf.getTextInRange(linesRange)).map(function (line, i) {
-        var result = !dedent ? tabString + line : line.replace(indentRegex, '');
-        if (i === 0) startDiff = result.length - line.length;
-        if (i === range.getRowCount() - 1) endDiff = result.length - line.length;
-        return result;
-      }).join(''));
-      range = range.copy();
-      range.start.column += startDiff;
-      range.end.column += endDiff;
-      self.selection.setRange(range);
-      return self;
-    }
-  }, {
-    key: 'visiblePos',
-    value: function visiblePos(pos) {
-      var self = this;
-      if (pos instanceof _range2.default) return new _range2.default(self.visiblePos(pos.start), self.visiblePos(pos.end));
-      pos = _point2.default.fromObject(pos, true);
-      pos.column = self.lineWithEndingForRow(pos.row).slice(0, Math.max(pos.column, 0)).replace(Editor._tabRegExp, _lodash2.default.repeat('\t', self.props.buffer.tabSize)).length;
-      return pos;
-    }
-  }, {
-    key: 'realPos',
-    value: function realPos(pos) {
-      if (pos instanceof _range2.default) return new _range2.default(this.realPos(pos.start), this.realPos(pos.end));
-      pos = _point2.default.fromObject(pos, true);
-      pos.column = this.lineWithEndingForRow(this.textBuf.clipPosition(pos).row).replace(Editor._tabRegExp, _lodash2.default.repeat('\t', this.props.buffer.tabSize)).slice(0, Math.max(pos.column, 0)).replace(new RegExp('\\t{1,' + this.props.buffer.tabSize + '}', 'g'), '\t').length;
-      return this.textBuf.clipPosition(pos);
-    }
-  }, {
-    key: 'moveCursorVertical',
-    value: function moveCursorVertical(count, paragraphs) {
-      var selection = this.selection;
-      var cursor = selection.getHeadPosition().copy();
-      if (count < 0 && cursor.row === 0) {
-        selection.setHeadPosition(new _point2.default(0, 0));
-      } else if (count > 0 && cursor.row === this.textBuf.getLastRow()) {
-        selection.setHeadPosition(new _point2.default(Infinity, Infinity));
-      } else {
-        if (paragraphs) {
-          paragraphs = Math.abs(count);
-          var direction = count ? paragraphs / count : 0;
-          while (paragraphs--) {
-            while (true) {
-              cursor.row += direction;
-
-              if (!(0 <= cursor.row && cursor.row < this.textBuf.getLastRow())) break;
-              if (/^\s*$/g.test(this.textBuf.lineForRow(cursor.row))) break;
-            }
-          }
-        } else {
-          cursor.row += count;
-        }
-
-        var x = this.preferredCursorX;
-        if (typeof x !== 'undefined') cursor.column = this.realPos(new _point2.default(cursor.row, x)).column;
-        this.updatePreferredX = false;
-        selection.setHeadPosition(cursor);
-        this.updatePreferredX = true;
-      }
-
-      return this;
-    }
-  }, {
-    key: 'moveCursorHorizontal',
-    value: function moveCursorHorizontal(count, words) {
-      var selection = this.selection;
-
-      if (words) {
-        words = Math.abs(count);
-        var direction = words / count;
-        while (words--) {
-          var cursor = selection.getHeadPosition();
-          var line = this.textBuf.lineForRow(cursor.row);
-          var wordMatch = _word2.default[direction === -1 ? 'prev' : 'current'](line, cursor.column);
-          this.moveCursorHorizontal(direction * Math.max(1, {
-            '-1': cursor.column - (wordMatch ? wordMatch.index : 0),
-            '1': (wordMatch ? wordMatch.index + wordMatch[0].length : line.length) - cursor.column
-          }[direction]));
-        }
-      } else {
-        var cursor = selection.getHeadPosition().copy();
-        while (true) {
-          if (-count > cursor.column) {
-            // Up a line
-            count += cursor.column + 1;
-            if (cursor.row > 0) {
-              cursor.row -= 1;
-              cursor.column = this.textBuf.lineForRow(cursor.row).length;
-            }
-          } else {
-            var restOfLineLength = this.textBuf.lineForRow(cursor.row).length - cursor.column;
-            if (count > restOfLineLength) {
-              // Down a line
-              count -= restOfLineLength + 1;
-              if (cursor.row < this.textBuf.getLastRow()) {
-                cursor.column = 0;
-                cursor.row += 1;
-              }
-            } else {
-              // Same line
-              cursor.column += count;
-              selection.setHeadPosition(cursor);
-              break;
-            }
-          }
-        }
-      }
-
-      return this;
-    }
-  }, {
-    key: 'copy',
-    value: function copy() {
-      var text = this.textBuf.getTextInRange(this.selection.getRange());
-      if (!text) return _bluebird2.default.resolve(this);
-      var screen = this.screen;
-      if (screen) {
-        screen.data.clipboard = text;
-        screen.copyToClipboard(text);
-      }
-      return clipboard.copyAsync(text).catch(function (err) {
-        _slapUtil2.default.logger.warn("Editor#copy", err);
-      }).tap(function () {
-        _slapUtil2.default.logger.debug('copied ' + text.length + ' characters');
-      }).return(this);
-    }
-  }, {
-    key: 'paste',
-    value: function paste() {
-      var self = this;
-      var selection = self.selection;
-      return clipboard.pasteAsync().catch(function (err) {
-        _slapUtil2.default.logger.warn("Editor#paste", err);
-      }).then(function (text) {
-        text = text || self.screen.data.clipboard;
-        if (typeof text === 'string') {
-          self.textBuf.setTextInRange(selection.getRange(), text);
-          selection.reversed = false;
-          selection.clearTail();
-          _slapUtil2.default.logger.debug('pasted ' + text.length + ' characters');
-        }
-        return self;
-      });
-    }
-  }, {
-    key: 'matchingBracket',
-    value: function matchingBracket(pos) {
-      pos = pos || this.selection.getHeadPosition();
-      var bracket = (this.lineWithEndingForRow(pos.row)[pos.column] || '').match(Editor._bracketsRegExp);
-      if (!bracket) return;
-      var start = !!bracket[1];
-      var _half = (bracket.length - 3) / 2 + 1;
-      function oppositeBracketMatchIndex(bracketMatch) {
-        var matchIndex;
-        bracketMatch.some(function (match, i) {
-          if ([0, 1, _half + 1].indexOf(i) === -1 && match) {
-            matchIndex = i + _half * (start ? 1 : -1);
-            return true;
-          }
-        });
-        return matchIndex;
-      }
-
-      var lines = _slapUtil2.default.text.splitLines(this.textBuf.getTextInRange(start ? new _range2.default(pos, new _point2.default(Infinity, Infinity)) : new _range2.default(new _point2.default(0, 0), new _point2.default(pos.row, pos.column + 1))));
-
-      if (!start) lines.reverse();
-
-      var matches = [];
-      var result = false;
-      lines.some(function (line, row) {
-        var column = start ? -1 : Infinity;
-        while (true) {
-          column = start ? _slapUtil2.default.text.regExpIndexOf(line, Editor._bracketsRegExp, column + 1) : _slapUtil2.default.text.regExpLastIndexOf(line.slice(0, column), Editor._bracketsRegExp);
-          if (column === -1) break;
-          var match = line[column].match(Editor._bracketsRegExp);
-          if (!!match[1] === start) {
-            matches.push(match);
-          } else {
-            var isOppositeBracket = !!match[oppositeBracketMatchIndex(matches.pop())];
-            if (!matches.length || !isOppositeBracket) {
-              result = {
-                column: column + (start && row === 0 && pos.column),
-                row: pos.row + (start ? row : -row),
-                match: isOppositeBracket
-              };
-              return true;
-            }
-          }
-        }
-      });
-      return result;
-    }
-  }, {
-    key: 'handleKeypress',
-    value: function handleKeypress(ch, key) {
-      var self = this;
-      var state = self.state;
-      var selection = self.selection;
-      var selectionRange = selection.getRange().copy();
-      var binding = _baseWidget2.default.prototype.resolveBinding.call({ options: self.props }, key);
-      if (self.props.multiLine && binding === 'indent' && key.full === 'tab' && selectionRange.isSingleLine()) binding = false;
-
-      if (binding && ['go', 'select', 'delete'].some(function (action) {
-        if (binding.indexOf(action) === 0) {
-          if (action !== 'go') selection.plantTail();
-          var directionDistance = binding.slice(action.length);
-          return [{ name: 'All' }, { name: 'MatchingBracket' }, { name: 'Left', axis: 'horizontal', direction: -1 }, { name: 'Right', axis: 'horizontal', direction: 1 }, { name: 'Up', axis: 'vertical', direction: -1 }, { name: 'Down', axis: 'vertical', direction: 1 }].some(function (direction) {
-            if (directionDistance.indexOf(direction.name) === 0) {
-              var moved = true;
-              var startSelectionHead = selection.getHeadPosition();
-
-              if (direction.name === 'All') {
-                selection.setRange(self.textBuf.getRange());
-              } else if (direction.name === 'MatchingBracket') {
-                var matchingBracket = self.matchingBracket();
-                if (matchingBracket) selection.setHeadPosition(matchingBracket);else moved = false;
-              } else {
-                // } else if ('direction' in direction) {
-                var selectionDirection = -(!selection.getRange().isEmpty() && selection.isReversed() * 2 - 1);
-                if (!(action === 'delete' && (selectionDirection || state.readOnly))) {
-                  var distance = directionDistance.slice(direction.name.length);
-                  switch (direction.axis) {
-                    case 'horizontal':
-                      switch (distance) {
-                        case '':
-                          if (action === 'go' && direction.direction === -selectionDirection) {
-                            selection.setHeadPosition(selection.getTailPosition());
-                          } else {
-                            self.moveCursorHorizontal(direction.direction);
-                          }
-                          break;
-                        case 'Word':
-                          self.moveCursorHorizontal(direction.direction, true);break;
-                        case 'Infinity':
-                          var cursor = selection.getHeadPosition();
-                          var firstNonWhiteSpaceX = (self.lineWithEndingForRow(cursor.row).match(/^\s*/) || [''])[0].length;
-                          selection.setHeadPosition(new _point2.default(cursor.row, direction.direction === -1 ? cursor.column === firstNonWhiteSpaceX ? 0 : firstNonWhiteSpaceX : Infinity));
-                          break;
-                        default:
-                          moved = false;break;
-                      }
-                      break;
-                    case 'vertical':
-                      switch (distance) {
-                        case '':
-                          self.moveCursorVertical(direction.direction);break;
-                        case 'Paragraph':
-                          self.moveCursorVertical(direction.direction, true);break;
-                        case 'Page':
-                          self.moveCursorVertical(direction.direction * self.props.pageLines);break;
-                        case 'Infinity':
-                          selection.setHeadPosition(direction.direction === -1 ? new _point2.default(0, 0) : new _point2.default(Infinity, Infinity));
-                          break;
-                        default:
-                          moved = false;break;
-                      }
-                  }
-                }
-              }
-              if (moved) {
-                if (action === 'go') selection.clearTail();
-                if (action === 'delete' && !state.readOnly) self.delete();
-                return true;
-              }
-            }
-          });
-        }
-      })) {
-        return false;
-      } else {
-        switch (binding) {
-          case 'selectLine':
-          case 'deleteLine':
-            var cursor = selection.getHeadPosition();
-            selection.setRange(new _range2.default(cursor.row === self.textBuf.getLineCount() - 1 ? new _point2.default(cursor.row - 1, Infinity) : new _point2.default(cursor.row, 0), new _point2.default(cursor.row + 1, 0)));
-            if (binding === 'deleteLine') self.delete();
-            selection.setHeadPosition(cursor);
-            return false;
-          case 'indent':
-          case 'dedent':
-            if (!self.props.multiLine) return;
-            self.indent(selectionRange, binding === 'dedent');return false;
-          case 'duplicateLine':
-            var cursor = selection.getHeadPosition();
-            var line = self.lineWithEndingForRow(cursor.row);
-            if (line === self.textBuf.lineForRow(cursor.row)) line = '\n' + line;
-            var nextLinePos = new _point2.default(cursor.row + 1, 0);
-            self.textBuf.setTextInRange(new _range2.default(nextLinePos, nextLinePos), line);
-            return false;
-          case 'undo':
-            self.textBuf.undo();return false;
-          case 'redo':
-            self.textBuf.redo();return false;
-          case 'copy':
-          case 'cut':
-            self.copy().done();
-            if (binding === 'cut') self.delete();
-            return false;
-          case 'paste':
-            self.paste().done();return false;
-          case 'toggleInsertMode':
-            self.setState({ insertMode: !state.insertMode });return false;
-          default:
-            if (!binding && !key.ctrl && ch) {
-              var enterPressed = key.name === 'return' || key.name === 'linefeed';
-              var cursor = selection.getHeadPosition();
-              var line = self.lineWithEndingForRow(cursor.row);
-              if (enterPressed) {
-                if (!self.props.multiLine) return;
-                ch = '\n' + line.slice(0, cursor.column).match(/^( |\t)*/)[0];
-              } else if (key.name === 'enter') {
-                return; // blessed remaps keys -- ch and key.sequence here are '\r'
-              } else if (ch === '\t') {
-                ch = self._getTabString();
-              } else if (ch === '\x1b') {
-                // escape
-                return;
-              }
-
-              if (!state.readOnly) {
-                if (selectionRange.isEmpty() && !state.insertMode && !enterPressed) selectionRange.end.column++;
-                selection.setRange(self.textBuf.setTextInRange(selectionRange, ch));
-                selection.reversed = false;
-                selection.clearTail();
-              }
-              return false;
-            }
-            break;
-        }
-      }
-    }
-  }, {
-    key: 'handleMouse',
-    value: function handleMouse(mouseData) {
-      if (!this.references.buffer) {
-        return;
-      }
-      /* var self = this
-      process.nextTick(() => { self._lastMouseData = mouseData })
-      if (mouseData.action === 'wheeldown' || mouseData.action === 'wheelup') {
-        self.scroll.row += {
-          wheelup: -1,
-          wheeldown: 1
-        }[mouseData.action] * self.props.pageLines
-        self.clipScroll()
-        return
-      }
-       var mouse = self.realPos(new Point(mouseData.y, mouseData.x)
-        .translate(BaseWidget.prototype.pos.call(this.references.buffer).negate())
-        .translate(self.scroll))
-       var newSelection = self.selection.copy()
-      if (mouseData.action === 'mouseup') self.lastClick = {mouse: mouse, time: Date.now()}
-      if (mouseData.action === 'mousedown') {
-        var lastClick = self.lastClick
-        if (lastClick && mouse.isEqual(lastClick.mouse) && lastClick.time + self.props.doubleClickDuration > Date.now()) {
-          self.lastClick = null
-          var line = self.textBuf.lineForRow(mouse.row)
-          var startX = mouse.column
-          var endX = mouse.column + 1
-          var prev = word.prev(line, mouse.column)
-          var current = word.current(line, mouse.column)
-          if (current) {
-            if (prev && current.index < prev.index + prev[0].length) {
-              startX = prev.index
-              endX = prev.index + prev[0].length
-            } else if (current.index <= mouse.column && mouse.column < current.index + current[0].length) {
-              startX = current.index
-              endX = current.index + current[0].length
-            }
-          }
-          newSelection.setRange(new Range(new Point(mouse.row, startX), new Point(mouse.row, endX)))
-        } else {
-          if ((self._lastMouseData || {}).action !== 'mousedown' && !mouseData.shift) newSelection.clearTail()
-          newSelection.setHeadPosition(mouse)
-          newSelection.plantTail()
-        }
-      }
-      self.selection.setRange(newSelection.getRange(), {reversed: newSelection.isReversed()})
-      newSelection.destroy() */
-    }
-  }, {
-    key: 'handleDetach',
-    value: function handleDetach() {
-      this.textBuf.destroy();
-      this._updateCursor();
-
-      if (--Editor.count) return;
-      Editor.highlightClient.tap(function (client) {
-        if (!client) return;
-        client.dontRespawn = true;
-        client.kill();
-      }).done();
-    }
-  }, {
-    key: 'clipScroll',
-    value: function clipScroll(poss) {
-      var self = this;
-
-      if (!this.references.buffer) {
-        return;
-      }
-
-      var size = _baseWidget2.default.prototype.size.call(this.references.buffer);
-      var scroll = (poss || []).reduce(function (scroll, pos) {
-        var cursorPadding = self.props.buffer.cursorPadding || {};
-        var minScroll = pos.translate(size.negate()).translate(new _point2.default((cursorPadding.right || 0) + 1, (cursorPadding.bottom || 0) + 1));
-        var maxScroll = pos.translate(new _point2.default(-cursorPadding.left || 0, -cursorPadding.top || 0));
-
-        return new _point2.default(Math.min(Math.max(scroll.row, minScroll.row), maxScroll.row), Math.min(Math.max(scroll.column, minScroll.column), maxScroll.column));
-      }, self.scroll);
-
-      self.scroll = new _point2.default(Math.max(0, Math.min(scroll.row, self.textBuf.getLineCount() - size.row)), Math.max(0, scroll.column));
-      self.forceUpdate();
-
-      return self;
-    }
-  }, {
-    key: '_markMatches',
-    value: function _markMatches() {
-      var self = this;
-      var selection = self.selection.getRange();
-      var selectionText = self.textBuf.getTextInRange(selection);
-      var line = self.lineWithEndingForRow(selection.end.row);
-
-      self.destroyMarkers({ type: 'match' });
-      if (selection.isSingleLine() && selectionText.match(/^[\w.-]+$/) && (line[selection.start.column - 1] || ' ').match(/\W/) && (line[selection.end.column] || ' ').match(/\W/)) {
-        self.textBuf.scan(new RegExp('\\b' + _lodash2.default.escapeRegExp(selectionText) + '\\b', 'g'), function (match) {
-          self.textBuf.markRange(match.range, { type: 'match' });
-        });
-      }
-      return self;
-    }
-  }, {
-    key: 'destroyMarkers',
-    value: function destroyMarkers(params) {
-      _lodash2.default.invoke(this.textBuf.findMarkers(params), 'destroy');
-      return this;
-    }
-  }, {
-    key: '_updateCursor',
-    value: function _updateCursor() {
-      var self = this;
-      var _references = this.references;
-      var root = _references.root;
-      var buffer = _references.buffer;
+		return _ret = (_temp = (_this = _possibleConstructorReturn(this, (_Object$getPrototypeO = Object.getPrototypeOf(Editor)).call.apply(_Object$getPrototypeO, [this].concat(args))), _this), _this.node = null, _this.screen = null, _this.program = null, _this.store = null, _temp), _possibleConstructorReturn(_this, _ret);
+	}
+	/**
+  * Class properties
+  */
 
 
-      if (!root || !buffer) {
-        return;
-      }
-
-      var screen = root.screen;
-      var program = screen.program;
+	/**
+  * Instance properties
+  */
 
 
-      if (!buffer.visible) {
-        program.hideCursor();
-        return;
-      }
-
-      var scrollCursor = self.visiblePos(self.selection.getHeadPosition()).translate(self.scroll.negate());
-      if (_baseWidget2.default.prototype.hasFocus.call(root) && new _range2.default(new _point2.default(0, 0), _baseWidget2.default.prototype.size.call(buffer).translate(new _point2.default(-1, -1))).containsPoint(scrollCursor)) {
-        var screenCursor = scrollCursor.translate(_baseWidget2.default.prototype.pos.call(buffer));
-        program.move(screenCursor.column, screenCursor.row);
-        program.showCursor();
-      } else {
-        program.hideCursor();
-      }
-    }
-  }, {
-    key: '_renderableTabString',
-    value: function _renderableTabString(match) {
-      return !this.props.buffer.visibleWhiteSpace ? _lodash2.default.repeat(' ', this.props.buffer.tabSize * match.length) : _slapUtil2.default.markup(_lodash2.default.repeat(_lodash2.default.repeat('─', this.props.buffer.tabSize - 1) + (this.props.buffer.tabSize ? '╴' : ''), match.length), this.props.style.whiteSpace);
-    }
-  }, {
-    key: '_renderableSpace',
-    value: function _renderableSpace(match) {
-      return !this.props.buffer.visibleWhiteSpace ? match : _slapUtil2.default.markup(_lodash2.default.repeat('·', match.length), this.props.style.whiteSpace);
-    }
-  }, {
-    key: '_renderableLineEnding',
-    value: function _renderableLineEnding(lineEnding) {
-      return !this.props.buffer.visibleLineEndings ? '' : _slapUtil2.default.markup(lineEnding.replace(/\n/g, '\\n').replace(/\r/g, '\\r'), this.props.style.whiteSpace);
-    }
-  }, {
-    key: 'reference',
-    value: function reference(name) {
-      var _this2 = this;
-
-      return function (reference) {
-        if (reference instanceof _react.Component && reference.references) {
-          _this2.references[name] = reference.references.root;
-        } else {
-          _this2.references[name] = reference;
-        }
-      };
-    }
-  }, {
-    key: 'render',
-    value: function render() {
-      /* var size = self.refs.buffer
-        ? BaseWidget.prototype.size.call(self.references.buffer)
-        : new Point(1024, 1024) */
-
-      /* const size = new Point(1024, 1024);
-      const gutterWidth = gutter.hidden === true ? 0 : gutter.width;
-       const selectionRange = selection.getRange();
-      const matchingBracket = self.matchingBracket(selection.getHeadPosition())
-      const cursorOnBracket = selectionRange.isEmpty() && matchingBracket !== undefined
-      const visibleSelection = self.visiblePos(selectionRange)
-      const visibleCursor = visibleSelection[selection.reversed ? 'start' : 'end']
-      const visibleMatchingBracket = selectionRange.isEmpty() && matchingBracket && self.visiblePos(matchingBracket)
-       const style = props.style
-      const defaultStyle = style.default
-      const selectionStyle = style.selection
-      const matchStyle = style.match
-      const bracketStyle = matchingBracket && matchingBracket.match ? style.matchingBracket : style.mismatchedBracket */
-
-      var self = this;
-      var props = _lodash2.default.merge({}, Editor.defaultProps, this.props);
-
-      var scroll = this.scroll;
-      var selection = this.selection;
-      var buffer = props.buffer;
-      var gutter = props.gutter;
-      var keyable = props.keyable;
+	_createClass(Editor, [{
+		key: 'saveNode',
 
 
-      var size = new _point2.default(1024, 1024);
-      var gutterWidth = gutter.hidden === true ? 0 : gutter.width;
+		/**
+   * Helper methods
+   */
+		value: function saveNode(ref) {
+			var screen = ref.screen;
+			var program = screen.program;
 
-      var cursorType = selection.reversed ? 'start' : 'end';
-      var cursor = this.visiblePos(selection.getRange())[cursorType];
+			this.node = ref;
+			this.screen = screen;
+			this.program = program;
+		}
+	}, {
+		key: 'componentDidMount',
+		value: function componentDidMount() {
+			var _this2 = this;
 
-      var text = (0, _blessed.escape)(this.textBuf.getTextInRange({
-        start: new _point2.default(scroll.row, 0),
-        end: scroll.translate(size)
-      }));
+			var props = this.props;
+			var node = this.node;
 
-      var lines = _slapUtil2.default.text.splitLines(text);
+			if (node) {
+				node.enableKeys();
+			}
+			if (props.stateful) {
+				(function () {
+					var combined = (0, _redux.combineReducers)(_reducers2.default);
+					var initial = (0, _fp.merge)({ contents: props.children });
+					var store = (0, _redux.createStore)(combined, initial(props));
+					var dispatchers = (0, _editor.editorMapDispatch)(store.dispatch);
+					var map = (0, _fp.merge)(dispatchers);
 
-      return _react2.default.createElement(
-        'element',
-        { ref: this.reference('root'),
-          onKeypress: this.handleKeypress,
-          onMouse: this.handleMouse,
-          keyable: keyable,
-          clickable: false,
-          onDetach: this.handleDetach
-        },
-        gutter.hidden === false && _react2.default.createElement(_Gutter2.default, _extends({}, gutter, {
-          ref: this.reference('gutter'),
-          width: gutterWidth,
-          offset: this.scroll.row,
-          active: cursor.row,
-          lines: lines.length
-        })),
-        _react2.default.createElement(_EditorBuffer2.default, {
-          ref: this.reference('buffer'),
-          left: gutterWidth,
-          offsetX: scroll.column,
-          offsetY: scroll.row,
-          size: size,
-          lines: lines,
-          textBuffer: this.textBuf
-        })
-      );
-    }
-  }, {
-    key: 'screen',
-    get: function get() {
-      var root = this.references.root;
-      if (root) {
-        return root.screen;
-      } else {
-        return null;
-      }
-    }
-  }], [{
-    key: 'parseCoordinate',
-    value: function parseCoordinate(n) {
-      return parseInt(n, 10) - 1 || 0;
-    }
-  }, {
-    key: 'exists',
-    value: function exists(givenPath) {
-      return fs.openAsync(givenPath, 'r').then(function (fd) {
-        return fs.closeAsync(fd);
-      }).return(true).catch(function (err) {
-        if (err.code !== 'ENOENT') throw err;
-        return false;
-      });
-    }
-  }, {
-    key: 'getOpenParams',
-    value: function getOpenParams(givenPath) {
-      givenPath = _slapUtil2.default.resolvePath(givenPath);
-      var baseParams = {
-        path: givenPath,
-        exists: false,
-        position: new _point2.default(0, 0)
-      };
-      var match = givenPath.match(Editor.openRegExp); // always matches
-      return [
-      // if a path like file.c:3:8 is passed, see if `file.c:3:8` exists first,
-      // then try `file.c:3` line 8, then `file.c` line 3 column 8
-      baseParams, _lodash2.default.merge({}, baseParams, {
-        path: match[1] + ':' + match[2],
-        position: { row: Editor.parseCoordinate(match[3]) }
-      }), _lodash2.default.merge({}, baseParams, {
-        path: match[1],
-        position: { row: Editor.parseCoordinate(match[2]), column: Editor.parseCoordinate(match[3]) }
-      })].reduce(function (promise, params) {
-        return promise.then(function (resultParams) {
-          if ((resultParams || {}).exists) return resultParams;
-          return Editor.exists(params.path).then(function (exists) {
-            params.exists = exists;
-            return params;
-          });
-        });
-      }, _bluebird2.default.resolve());
-    }
-  }, {
-    key: 'markerCmp',
-    value: function markerCmp(a, b) {
-      return Editor.MARKER_ORDER.indexOf(b.properties.type) - Editor.MARKER_ORDER.indexOf(a.properties.type);
-    }
-  }]);
+					store.subscribe(function () {
+						var state = store.getState();
+						var mapped = map((0, _editor.editorMapProps)(state));
+						_this2.setState(mapped);
+					});
+				})();
+			}
+		}
+	}, {
+		key: 'componentWillUnmount',
+		value: function componentWillUnmount() {
+			var node = this.node;
 
-  return Editor;
-}(_react.Component), (_applyDecoratedDescriptor(_class.prototype, 'handleKeypress', [_autobindDecorator2.default], Object.getOwnPropertyDescriptor(_class.prototype, 'handleKeypress'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'handleMouse', [_autobindDecorator2.default], Object.getOwnPropertyDescriptor(_class.prototype, 'handleMouse'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'handleDetach', [_autobindDecorator2.default], Object.getOwnPropertyDescriptor(_class.prototype, 'handleDetach'), _class.prototype)), _class);
+			if (node) {
+				node.off('keypress');
+			}
+		}
+
+		/**
+   * Event handlers
+   */
+
+	}, {
+		key: 'handleBinding',
+		value: function handleBinding(binding) {
+			var props = this.props;
+
+
+			switch (binding) {
+				/**
+     * ↑
+     */
+				case 'goUp':
+					props.onGoUp(props);
+					break;
+				case 'goUpInfinity':
+					props.onGoUpInfinity(props);
+					break;
+
+				/**
+     * →
+     */
+				case 'goRight':
+					props.onGoRight(props);
+					break;
+				case 'goRightWord':
+					props.onGoRightWord(props);
+					break;
+				case 'goRightInfinity':
+					props.onGoRightInfinity(props);
+					break;
+
+				/**
+     * ↓
+     */
+				case 'goDown':
+					props.onGoDown(props);
+					break;
+				case 'goDownInfinity':
+					props.onGoDownInfinity(props);
+					break;
+
+				/**
+     * ←
+     */
+				case 'goLeft':
+					props.onGoLeft(props);
+					break;
+				case 'goLeftWord':
+					props.onGoLeftWord(props);
+					break;
+				case 'goLeftInfinity':
+					props.onGoLeftInfinity(props);
+					break;
+				default:
+					break;
+			}
+		}
+	}, {
+		key: 'handleDeletion',
+		value: function handleDeletion() {
+			this.props.onGoBack(this.props);
+			this.props.onDeletion(this.props);
+		}
+	}, {
+		key: 'handleInsertion',
+		value: function handleInsertion(value) {
+			this.props.onInsertion(value, this.props);
+			this.props.onGoRight(this.props);
+		}
+	}, {
+		key: 'handleInput',
+		value: function handleInput(value, character) {
+			if (character.full === 'backspace') {
+				this.handleDeletion();
+			} else {
+				this.handleInsertion(value);
+			}
+		}
+	}, {
+		key: 'handleKeypress',
+		value: function handleKeypress(value, character) {
+			var _props = this.props;
+			var keyBindings = _props.keyBindings;
+			var focus = _props.focus;
+
+			if (!focus) {
+				return;
+			}
+
+			var binding = (0, _resolveBinding2.default)(character.full, keyBindings);
+
+			if (binding) {
+				this.handleBinding(binding);
+			} else {
+				this.handleInput(value, character);
+			}
+		}
+
+		/**
+   * Render function
+   * - basic and cheap display value computation
+   * - invocation of sub components
+   */
+
+	}, {
+		key: 'render',
+		value: function render(props, state) {
+			var source = props.stateful ? state : props;
+
+			var focus = source.focus;
+			var cursor = source.cursor;
+			var gutter = source.gutter;
+			var children = source.children;
+
+			var other = _objectWithoutProperties(source, ['focus', 'cursor', 'gutter', 'children']);
+
+			var matrix = (0, _getMatrix2.default)(children);
+			var matrixCursorLine = (0, _getMatrixLine2.default)(matrix, cursor.y);
+			var cursorContent = (0, _getMatrixCharacter2.default)(matrix, cursor);
+			var cursorY = Math.min(matrix.length, cursor.y);
+			var cursorX = Math.min(matrixCursorLine.length, cursor.x);
+
+			var active = focus ? cursor.y : -1;
+
+			var gutterProps = (typeof gutter === 'undefined' ? 'undefined' : _typeof(gutter)) === 'object' ? gutter : {};
+
+			var gutterWidth = 'width' in gutterProps ? gutterProps.width : String(matrix.length).length + 1;
+
+			var gutterOffsetX = gutterWidth + 2;
+
+			return _react2.default.createElement(
+				'box',
+				_extends({}, other, {
+					ref: this.saveNode,
+					onKeypress: this.handleKeypress
+				}),
+				gutter && _react2.default.createElement(_editorGutter2.default, _extends({
+					width: gutterWidth
+				}, gutterProps, {
+					lines: matrix.length,
+					active: active
+				})),
+				_react2.default.createElement(
+					_editorBuffer2.default,
+					{ left: gutterOffsetX },
+					children
+				),
+				focus && cursor && _react2.default.createElement(
+					_editorCursor2.default,
+					{
+						matrix: matrix,
+						top: cursorY,
+						left: cursorX + gutterOffsetX,
+						style: cursor.style
+					},
+					cursorContent
+				)
+			);
+		}
+	}]);
+
+	return Editor;
+}(_react.Component), _class2.propTypes = {
+	children: _react.PropTypes.string,
+	focus: _react.PropTypes.bool,
+	stateful: _react.PropTypes.bool,
+	onGoUp: _react.PropTypes.func.isRequired,
+	onGoRight: _react.PropTypes.func.isRequired,
+	onGoRightWord: _react.PropTypes.func.isRequired,
+	onGoRightInfinity: _react.PropTypes.func.isRequired,
+	onGoDown: _react.PropTypes.func.isRequired,
+	onGoDownInfinity: _react.PropTypes.func.isRequired,
+	onGoLeft: _react.PropTypes.func.isRequired,
+	onGoLeftWord: _react.PropTypes.func.isRequired,
+	onGoLeftInfinity: _react.PropTypes.func.isRequired,
+	onGoBack: _react.PropTypes.func.isRequired,
+	onInsertion: _react.PropTypes.func.isRequired,
+	onDeletion: _react.PropTypes.func.isRequired,
+	cursor: _react.PropTypes.oneOfType([_react.PropTypes.bool, _react.PropTypes.shape({
+		x: _react.PropTypes.number.isRequired,
+		y: _react.PropTypes.number.isRequired,
+		style: _react.PropTypes.any
+	})]),
+	gutter: _react.PropTypes.oneOfType([_react.PropTypes.bool, _react.PropTypes.shape(_editorGutter2.default.propTypes)]),
+	keyBindings: _react.PropTypes.shape({
+		goLeft: _react.PropTypes.arrayOf(_react.PropTypes.string),
+		goLeftWord: _react.PropTypes.arrayOf(_react.PropTypes.string),
+		goLeftInfinity: _react.PropTypes.arrayOf(_react.PropTypes.string),
+		goRight: _react.PropTypes.arrayOf(_react.PropTypes.string),
+		goRightWord: _react.PropTypes.arrayOf(_react.PropTypes.string),
+		goRightInfinity: _react.PropTypes.arrayOf(_react.PropTypes.string),
+		goUp: _react.PropTypes.arrayOf(_react.PropTypes.string),
+		goUpRange: _react.PropTypes.arrayOf(_react.PropTypes.string),
+		goUpInfinity: _react.PropTypes.arrayOf(_react.PropTypes.string),
+		goDown: _react.PropTypes.arrayOf(_react.PropTypes.string),
+		goDownPage: _react.PropTypes.arrayOf(_react.PropTypes.string),
+		goDownInfinity: _react.PropTypes.arrayOf(_react.PropTypes.string)
+	})
+}, _class2.defaultProps = {
+	children: '',
+	focus: false,
+	cursor: false,
+	gutter: false,
+	stateful: false,
+	onGoUp: _fp.noop,
+	onGoUpInfinity: _fp.noop,
+	onGoRight: _fp.noop,
+	onGoRightWord: _fp.noop,
+	onGoRightInfinity: _fp.noop,
+	onGoDown: _fp.noop,
+	onGoDownInfinity: _fp.noop,
+	onGoLeft: _fp.noop,
+	onGoLeftWord: _fp.noop,
+	onGoLeftInfinity: _fp.noop,
+	onGoBack: _fp.noop,
+	onDeletion: _fp.noop,
+	onInsertion: _fp.noop,
+	keyBindings: {
+		goLeft: ['left'],
+		goLeftWord: ['C-left'],
+		goLeftInfinity: ['C-a', 'home'],
+		goRight: ['right'],
+		goRightWord: ['C-right'],
+		goRightInfinity: ['C-e', 'end'],
+		goUp: ['up'],
+		goUpPage: ['pageup'],
+		goUpInfinity: ['C-home'],
+		goDown: ['down'],
+		goDownPage: ['pagedown'],
+		goDownInfinity: ['C-end']
+	}
+}, _temp2)) || _class) || _class) || _class;
+
 exports.default = Editor;
-
-
-_lodash2.default.merge(Editor, {
-  count: 0,
-  MARKER_ORDER: ['syntax', 'match', 'findMatch', 'selection'],
-  // looks for path like /home/dan/file.c:3:8 but matches every string
-  openRegExp: new RegExp(['^', '(.*?)', // path:   match[1] (like /home/dan/file.c)
-  '(?:\\:(\\d+))?', // row:    match[2] (like 3, optional)
-  '(?:\\:(\\d+))?', // column: match[3] (like 8, optional)
-  '$'].join('')),
-  _tabRegExp: /\t/g,
-  _bracketsRegExp: /((\()|(\[)|(\{))|((\))|(\])|(\}))/,
-  _nonprintableRegExp: /[\x00-\x1f]|\x7f/g
-});

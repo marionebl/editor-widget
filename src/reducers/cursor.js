@@ -37,12 +37,11 @@ export function cursor(state = {}, action) {
 		case actions.GO_BACK: {
 			const backY = x === 0 ? y - 1 : y;
 			const backLine = getMatrixLine(matrix, backY);
-			const backX = x === 0 ? backLine.length - 1 : x - 1;
-			const clampBackColumn = clampPositive(backLine.length);
+			const backX = x === 0 ? backLine.length : x - 1;
 
 			return {
 				...state,
-				x: clampBackColumn(backX),
+				x: backX,
 				y: clampLine(backY)
 			};
 		}

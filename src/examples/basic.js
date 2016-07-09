@@ -31,7 +31,7 @@ function main() {
 		focus: true,
 		cursor: {
 			x: 4,
-			y: 3
+			y: 11
 		}
 	});
 
@@ -39,6 +39,7 @@ function main() {
 		handleUncaughtExceptions: false,
 		log: 'debug.log'
 	});
+	global.screen = screen;
 
 	screen.key(['C-q', 'C-c'], () => {
 		screen.destroy();
