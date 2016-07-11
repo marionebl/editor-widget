@@ -1,8 +1,7 @@
 import React, {Component, PropTypes as t} from 'react';
 import autobind from 'autobind-decorator';
 import pure from 'pure-render-decorator';
-import {merge, noop} from 'lodash/fp';
-import {createStore, combineReducers} from 'redux';
+import {noop} from 'lodash/fp';
 
 import deep from './utilities/deep-defaults';
 import getMatrix from './utilities/get-matrix';
@@ -12,9 +11,6 @@ import resolveBinding from './utilities/resolve-binding';
 import EditorBuffer from './editor-buffer';
 import EditorCursor from './editor-cursor';
 import EditorGutter from './editor-gutter';
-
-import reducers from './reducers';
-import {editorMapDispatch, editorMapProps} from './connectors/editor';
 
 @pure
 @deep
@@ -26,7 +22,6 @@ export class Editor extends Component {
 	static propTypes = {
 		children: t.string,
 		focus: t.bool,
-		stateful: t.bool,
 		onGoUp: t.func.isRequired,
 		onGoRight: t.func.isRequired,
 		onGoRightWord: t.func.isRequired,
@@ -73,7 +68,6 @@ export class Editor extends Component {
 		focus: false,
 		cursor: false,
 		gutter: false,
-		stateful: false,
 		onGoUp: noop,
 		onGoUpInfinity: noop,
 		onGoRight: noop,
@@ -124,22 +118,9 @@ export class Editor extends Component {
 	}
 
 	componentDidMount() {
-		const {props, node} = this;
+		const {node} = this;
 		if (node) {
 			node.enableKeys();
-		}
-		if (props.stateful) {
-			const combined = combineReducers(reducers);
-			const initial = merge({contents: props.children});
-			const store = createStore(combined, initial(props));
-			const dispatchers = editorMapDispatch(store.dispatch);
-			const map = merge(dispatchers);
-
-			store.subscribe(() => {
-				const state = store.getState();
-				const mapped = map(editorMapProps(state));
-				this.setState(mapped);
-			});
 		}
 	}
 
@@ -258,24 +239,20 @@ export class Editor extends Component {
 	 * - basic and cheap display value computation
 	 * - invocation of sub components
 	 */
-	render(props, state) {
-		const source = props.stateful ? state : props;
-
+	render(props) {
 		const {
 			focus,
 			cursor,
 			gutter,
 			children,
 			...other
-		} = source;
+		} = props;
 
 		const matrix = getMatrix(children);
 		const matrixCursorLine = getMatrixLine(matrix, cursor.y);
 		const cursorY = Math.min(matrix.length, cursor.y);
 		const cursorX = Math.min(matrixCursorLine.length, cursor.x);
-
 		const active = focus ? cursor.y : -1;
-
 		const gutterProps = typeof gutter === 'object' ? gutter : {};
 
 		const gutterWidth = 'width' in gutterProps ?
