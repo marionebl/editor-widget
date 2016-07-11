@@ -1,28 +1,56 @@
-# editor-widget [![Build Status](https://travis-ci.org/slap-editor/editor-widget.svg?branch=master)](https://travis-ci.org/slap-editor/editor-widget)
-`<Editor>` component for [react-blessed](https://github.com/Yomguithereal/react-blessed)
+> Project status: 🚧💥
 
-## [src/examples/basic.jsx](src/examples/basic.jsx)
-```js
-import React, {Component} from 'react'
-import blessed from 'blessed'
-import {render} from 'react-blessed'
+# react-blessed-editor
 
-import {Editor} from 'editor-widget'
+A multiline editor for [react-blessed](https://github.com/Yomguithereal/react-blessed). Inspired [slap-editor](https://github.com/slap-editor/slap)'s excellect [editor-widget](https://github.com/slap-editor/editor-widget) .
 
-export default class EditorExample extends Component {
-  componentDidMount () {
-    this.refs.editor.open(__filename).done()
-  }
-  render () {
-    return (
-      <Editor ref="editor">
-        loading...
-      </Editor>
-    )
-  }
-}
+*  Radically component oriented design
+*  Fully customizable
+*  Plug and play(ish) via default reducers and connectors
 
-var screen = new blessed.Screen()
-screen.key('C-q', () => { process.exit() })
-render(<EditorExample />, screen)
+## Installation
+
+Grab it via `npm`
+
+```sh
+npm install --save react-blessed-editor
 ```
+
+## Features
+
+*  User-friendly multiline editing
+*  Slap-like key bindings for navigation and editing
+
+## Usage
+
+react-blessed-editor is designed to work with react-blessed. At its core it only provides
+stateless components – logic is implemented in cherry-pickable reducers, actions and connectors.
+
+**Using default reducers and connector**
+
+```js
+import React from 'react';
+import {render} from 'react-blessed';
+import {Screen} from 'blessed';
+
+import {createStore, combineReducers} from 'redux';
+import {Editor, editorReducers, connect} from 'react-blessed-editor';
+
+const editorReducer = combineReducers(editorReducers);
+const editorStore = createStore(editorReducer);
+const ConnectedEditor = connect(Editor);
+const Application = <Provider store={editorStore}><ConnectedEditor/></Provider>;
+
+render(Application, screen);
+```
+
+## Roadmap
+*  [ ] :warning: Scrolling
+*  [ ] :warning: Proper tabs support
+*  [ ] Invisible character representation
+*  [ ] Extended copy and paste support
+*  [ ] Syntax highlighting
+*  [ ] More usage examples
+
+---
+Built by Mario Nebl. Released under the [MIT License](./LICENSE)

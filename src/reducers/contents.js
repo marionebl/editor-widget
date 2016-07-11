@@ -1,5 +1,3 @@
-import {clamp} from 'lodash/fp';
-
 import {
 	EDIT_DELETE,
 	EDIT_INSERT,
@@ -7,9 +5,6 @@ import {
 } from '../actions';
 
 import getMatrix from '../utilities/get-matrix';
-import getMatrixLine from '../utilities/get-matrix-line';
-
-const clampPositive = clamp(0);
 
 function getCharacterIndex(matrix, x, y) {
 	const lines = matrix.slice(0, y);
@@ -18,8 +13,13 @@ function getCharacterIndex(matrix, x, y) {
 	return lines.reduce((sum, line) => sum + line.length + 1, column);
 }
 
+function sanitize(value) {
+	// TODO: handle tabs properly
+	return value.replace(/\t/g, '  ');
+}
+
 export function contentsReducer(unsanitized = '', action) {
-	const state = unsanitized.replace(/\t/g, '  ');
+	const state = sanitize(unsanitized);
 
 	if (!action.payload) {
 		return state;
@@ -43,14 +43,15 @@ export function contentsReducer(unsanitized = '', action) {
 				state;
 		}
 		case EDIT_INSERT: {
-			const {cursor, value} = action.payload;
+			const {cursor, value = ''} = action.payload;
+			const sanitized = sanitize(value);
 			const matrix = getMatrix(state);
 			const index = getCharacterIndex(matrix, cursor.x, cursor.y);
 
 			const before = state.slice(0, Math.max(index, 0));
 			const after = state.slice(Math.max(index, 0));
 
-			return `${before}${value}${after}`;
+			return `${before}${sanitized}${after}`;
 		}
 		case EDIT_NEWLINE: {
 			const {cursor} = action.payload;

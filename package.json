@@ -1,9 +1,9 @@
 {
-  "name": "editor-widget",
-  "version": "1.1.1",
+  "name": "react-blessed-editor",
+  "version": "0.0.0",
   "description": "<Editor> component for react-blessed",
-  "homepage": "https://github.com/slap-editor/editor-widget#readme",
-  "bugs": "https://github.com/slap-editor/editor-widget/issues",
+  "homepage": "https://github.com/marionebl/react-blessed-editor",
+  "bugs": "https://github.com/marionebl/react-blessed-editor/issues",
   "main": "dist/index.js",
   "scripts": {
     "start": "npm run test -- --watch",
@@ -14,7 +14,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/slap-editor/editor-widget.git"
+    "url": "git+https://github.com/marionebl/react-blessed-editor.git"
   },
   "dependencies": {
     "@marionebl/redux-cli-logger": "^1.4.0",
@@ -58,7 +58,7 @@
     "react": "0.14.x",
     "react-blessed": "0.1.x"
   },
-  "author": "Dan Kaplun <dbkaplun@gmail.com>",
+  "author": "Mario Nebl <hello@herebecode.com>",
   "license": "MIT",
   "ava": {
     "files": [
