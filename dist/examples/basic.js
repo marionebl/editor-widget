@@ -26,7 +26,7 @@ var _ = require('..');
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function renderEditor(screen, store) {
-	var Application = (0, _.connect)(_.Editor);
+	var Application = (0, _.createEditorConnector)()(_.Editor);
 
 	return (0, _reactBlessed.render)(_react2.default.createElement(
 		_reactRedux.Provider,
@@ -38,7 +38,6 @@ function renderEditor(screen, store) {
 function getStore(reducers, contents, screen) {
 	var initial = {
 		contents: contents,
-		gutter: true,
 		focus: true,
 		cursor: {
 			x: 0,
@@ -77,10 +76,11 @@ function refreshScreen(screen) {
 }
 
 function main() {
-	var source = (0, _path.resolve)(__dirname, 'foo');
+	var source = (0, _path.resolve)(__filename);
 	var contents = (0, _fs.readFileSync)(source, 'utf-8');
 
-	var combined = (0, _redux.combineReducers)(_.editorReducers);
+	var editorReducers = (0, _.createEditorReducers)();
+	var combined = (0, _redux.combineReducers)(editorReducers);
 	var screen = getScreen();
 
 	var store = getStore(combined, contents, screen);
@@ -88,7 +88,7 @@ function main() {
 
 	if (module.hotswap) {
 		module.hotswap.on('hotswap', function () {
-			var next = (0, _redux.combineReducers)(reducers);
+			var next = (0, _redux.combineReducers)(editorReducers);
 			screen = refreshScreen(screen);
 			store.replaceReducer(next);
 			renderEditor(screen, store);
