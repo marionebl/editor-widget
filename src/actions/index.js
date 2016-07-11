@@ -12,6 +12,7 @@ export const GO_BACK = 'goBack';
 
 export const EDIT_DELETE = 'editDelete';
 export const EDIT_INSERT = 'editInsert';
+export const EDIT_NEWLINE = 'editNewline';
 
 export default {
 	GO_UP,
@@ -26,5 +27,6 @@ export default {
 	GO_RIGHT_INFINITY,
 	GO_BACK,
 	EDIT_DELETE,
-	EDIT_INSERT
+	EDIT_INSERT,
+	EDIT_NEWLINE
 };

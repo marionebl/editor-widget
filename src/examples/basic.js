@@ -1,11 +1,14 @@
 #!/usr/bin/env babel-node
+import {resolve} from 'path';
 import {readFileSync} from 'fs';
 
 import React from 'react';
 import {render} from 'react-blessed';
 import {Screen} from 'blessed';
-import {createStore, combineReducers} from 'redux';
+import {applyMiddleware, createStore, combineReducers} from 'redux';
 import {Provider} from 'react-redux';
+import createLogger from '@marionebl/redux-cli-logger';
+
 import {Editor, reducers, connectors} from '..';
 
 function renderEditor(screen, store) {
@@ -20,39 +23,65 @@ function renderEditor(screen, store) {
 	);
 }
 
-function main() {
-	const contents = readFileSync(__filename, 'utf-8');
-
-	const combined = combineReducers(reducers);
-
-	const store = createStore(combined, {
+function getStore(reducers, contents, screen) {
+	const initial = {
 		contents,
 		gutter: true,
 		focus: true,
 		cursor: {
-			x: 4,
-			y: 11
+			x: 0,
+			y: 0
 		}
-	});
+	};
 
+	const middlwares = applyMiddleware(
+		createLogger({
+			console: {
+				log: ::screen.log
+			}
+		})
+	);
+
+	const store = createStore(reducers, initial, middlwares);
+	return store;
+}
+
+function getScreen() {
 	const screen = new Screen({
 		handleUncaughtExceptions: false,
 		log: 'debug.log'
 	});
-	global.screen = screen;
 
 	screen.key(['C-q', 'C-c'], () => {
 		screen.destroy();
 		process.exit(0);
 	});
 
+	global.screen = screen;
+	return screen;
+}
+
+function refreshScreen(screen) {
+	screen.destroy();
+	return getScreen();
+}
+
+function main() {
+	const source = resolve(__dirname, 'foo');
+	const contents = readFileSync(source, 'utf-8');
+
+	const combined = combineReducers(reducers);
+	let screen = getScreen();
+
+	const store = getStore(combined, contents, screen);
 	renderEditor(screen, store);
 
 	if (module.hotswap) {
 		module.hotswap.on('hotswap', () => {
 			const next = combineReducers(reducers);
+			screen = refreshScreen(screen);
 			store.replaceReducer(next);
-			// renderEditor(screen, store);
+			renderEditor(screen, store);
 		});
 
 		module.hotswap.on('error', error => {

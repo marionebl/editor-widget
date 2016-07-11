@@ -7,7 +7,6 @@ import {createStore, combineReducers} from 'redux';
 import deep from './utilities/deep-defaults';
 import getMatrix from './utilities/get-matrix';
 import getMatrixLine from './utilities/get-matrix-line';
-import getMatrixCharacter from './utilities/get-matrix-character';
 import resolveBinding from './utilities/resolve-binding';
 
 import EditorBuffer from './editor-buffer';
@@ -40,6 +39,7 @@ export class Editor extends Component {
 		onGoBack: t.func.isRequired,
 		onInsertion: t.func.isRequired,
 		onDeletion: t.func.isRequired,
+		onNewLine: t.func.isRequired,
 		cursor: t.oneOfType([
 			t.bool,
 			t.shape({
@@ -87,6 +87,7 @@ export class Editor extends Component {
 		onGoBack: noop,
 		onDeletion: noop,
 		onInsertion: noop,
+		onNewLine: noop,
 		keyBindings: {
 			goLeft: ['left'],
 			goLeftWord: ['C-left'],
@@ -207,19 +208,32 @@ export class Editor extends Component {
 	}
 
 	handleDeletion() {
-		this.props.onGoBack(this.props);
 		this.props.onDeletion(this.props);
 	}
 
 	handleInsertion(value) {
 		this.props.onInsertion(value, this.props);
-		this.props.onGoRight(this.props);
+	}
+
+	handleNewLine() {
+		const {props} = this;
+		props.onNewLine(props);
 	}
 
 	handleInput(value, character) {
+		// IMPORTANT: This seems nonsensical but isn't. Blessed
+		// will trigger two events for every enter/return keypress.
+		// We elect to use only "return" here.
+		// Pressing enter/return will always trigger both events
+		if (character.full === 'enter') {
+			return;
+		}
+
 		if (character.full === 'backspace') {
 			this.handleDeletion();
-		} else {
+		} else if (character.full === 'return') {
+			this.handleNewLine();
+		} else if (value) {
 			this.handleInsertion(value);
 		}
 	}
@@ -257,7 +271,6 @@ export class Editor extends Component {
 
 		const matrix = getMatrix(children);
 		const matrixCursorLine = getMatrixLine(matrix, cursor.y);
-		const cursorContent = getMatrixCharacter(matrix, cursor);
 		const cursorY = Math.min(matrix.length, cursor.y);
 		const cursorX = Math.min(matrixCursorLine.length, cursor.x);
 
@@ -298,9 +311,7 @@ export class Editor extends Component {
 							top={cursorY}
 							left={cursorX + gutterOffsetX}
 							style={cursor.style}
-							>
-							{cursorContent}
-						</EditorCursor>
+							/>
 				}
 			</box>
 		);

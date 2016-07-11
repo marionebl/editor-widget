@@ -99,6 +99,14 @@ export function editorMapDispatch(dispatch) {
 					cursor
 				}
 			});
+		},
+		onNewLine({cursor}) {
+			dispatch({
+				type: actions.EDIT_NEWLINE,
+				payload: {
+					cursor
+				}
+			});
 		}
 	};
 }
