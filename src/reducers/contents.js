@@ -1,10 +1,5 @@
-import {
-	EDIT_DELETE,
-	EDIT_INSERT,
-	EDIT_NEWLINE
-} from '../actions';
-
 import getMatrix from '../utilities/get-matrix';
+import createActions from '../actions';
 
 function getCharacterIndex(matrix, x, y) {
 	const lines = matrix.slice(0, y);
@@ -18,55 +13,59 @@ function sanitize(value) {
 	return value.replace(/\t/g, '  ');
 }
 
-export function contentsReducer(unsanitized = '', action) {
-	const state = sanitize(unsanitized);
+export function createContentsReducer(ident) {
+	const actions = createActions(ident);
 
-	if (!action.payload) {
-		return state;
-	}
+	return function contentsReducer(unsanitized = '', action) {
+		const state = sanitize(unsanitized);
 
-	switch (action.type) {
-		case EDIT_DELETE: {
-			const {cursor} = action.payload;
-			const matrix = getMatrix(state);
-			const index = Math.max(getCharacterIndex(matrix, cursor.x, cursor.y) - 1, 0);
-
-			if (index === 0) {
-				return state.slice(1);
-			}
-
-			const before = state.slice(0, index);
-			const after = state.slice(index + 1);
-
-			return before.length > 0 ?
-				`${before}${after}` :
-				state;
-		}
-		case EDIT_INSERT: {
-			const {cursor, value = ''} = action.payload;
-			const sanitized = sanitize(value);
-			const matrix = getMatrix(state);
-			const index = getCharacterIndex(matrix, cursor.x, cursor.y);
-
-			const before = state.slice(0, Math.max(index, 0));
-			const after = state.slice(Math.max(index, 0));
-
-			return `${before}${sanitized}${after}`;
-		}
-		case EDIT_NEWLINE: {
-			const {cursor} = action.payload;
-			const matrix = getMatrix(state);
-			const index = getCharacterIndex(matrix, cursor.x, cursor.y);
-			const offset = cursor.x === 0 ? -1 : 0;
-
-			const before = state.slice(0, Math.max(index + offset, 0));
-			const after = state.slice(Math.max(index + offset, 0));
-
-			return `${before}\n${after}`;
-		}
-		default:
+		if (!action.payload) {
 			return state;
-	}
+		}
+
+		switch (action.type) {
+			case actions.EDIT_DELETE: {
+				const {cursor} = action.payload;
+				const matrix = getMatrix(state);
+				const index = Math.max(getCharacterIndex(matrix, cursor.x, cursor.y) - 1, 0);
+
+				if (index === 0) {
+					return state.slice(1);
+				}
+
+				const before = state.slice(0, index);
+				const after = state.slice(index + 1);
+
+				return before.length > 0 ?
+					`${before}${after}` :
+					state;
+			}
+			case actions.EDIT_INSERT: {
+				const {cursor, value = ''} = action.payload;
+				const sanitized = sanitize(value);
+				const matrix = getMatrix(state);
+				const index = getCharacterIndex(matrix, cursor.x, cursor.y);
+
+				const before = state.slice(0, Math.max(index, 0));
+				const after = state.slice(Math.max(index, 0));
+
+				return `${before}${sanitized}${after}`;
+			}
+			case actions.EDIT_NEWLINE: {
+				const {cursor} = action.payload;
+				const matrix = getMatrix(state);
+				const index = getCharacterIndex(matrix, cursor.x, cursor.y);
+				const offset = cursor.x === 0 ? -1 : 0;
+
+				const before = state.slice(0, Math.max(index + offset, 0));
+				const after = state.slice(Math.max(index + offset, 0));
+
+				return `${before}\n${after}`;
+			}
+			default:
+				return state;
+		}
+	};
 }
 
-export default contentsReducer;
+export default createContentsReducer;

@@ -1,9 +1,9 @@
-import editor from './editor';
+import createEditorConnector from './editor';
 
 export {
-	editor
+	createEditorConnector
 };
 
 export default {
-	editor
+	createEditorConnector
 };

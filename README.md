@@ -34,11 +34,17 @@ import {render} from 'react-blessed';
 import {Screen} from 'blessed';
 
 import {createStore, combineReducers} from 'redux';
-import {Editor, editorReducers, connect} from 'react-blessed-editor';
+import {Editor, createEditorReducers, createEditorConnectors} from 'react-blessed-editor';
 
+const editorReducers = createEditorReducers('default'); // create reducers namespaced to `.default`
 const editorReducer = combineReducers(editorReducers);
-const editorStore = createStore(editorReducer);
-const ConnectedEditor = connect(Editor);
+
+const editorStore = createStore(editorReducer, {
+	default: {
+		contents: 'This will be the initial content\n\nIt is namespaced to .default'
+	}
+});
+const ConnectedEditor = createEditorConnectors('default')(Editor);
 const Application = <Provider store={editorStore}><ConnectedEditor/></Provider>;
 
 render(Application, screen);
@@ -47,6 +53,7 @@ render(Application, screen);
 ## Roadmap
 *  [ ] :warning: Scrolling
 *  [ ] :warning: Proper tabs support
+*  [ ] ⚡Performance ⚡Performance ⚡Performance
 *  [ ] Invisible character representation
 *  [ ] Extended copy and paste support
 *  [ ] Syntax highlighting

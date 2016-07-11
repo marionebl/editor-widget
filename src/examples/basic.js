@@ -9,10 +9,10 @@ import {applyMiddleware, createStore, combineReducers} from 'redux';
 import {Provider} from 'react-redux';
 import createLogger from '@marionebl/redux-cli-logger';
 
-import {Editor, editorReducers, connect} from '..';
+import {Editor, createEditorReducers, createEditorConnector} from '..';
 
 function renderEditor(screen, store) {
-	const Application = connect(Editor);
+	const Application = createEditorConnector()(Editor);
 
 	return render(
 		<Provider store={store}>
@@ -65,9 +65,10 @@ function refreshScreen(screen) {
 }
 
 function main() {
-	const source = resolve(__dirname, 'foo');
+	const source = resolve(__filename);
 	const contents = readFileSync(source, 'utf-8');
 
+	const editorReducers = createEditorReducers();
 	const combined = combineReducers(editorReducers);
 	let screen = getScreen();
 
@@ -76,7 +77,7 @@ function main() {
 
 	if (module.hotswap) {
 		module.hotswap.on('hotswap', () => {
-			const next = combineReducers(reducers);
+			const next = combineReducers(editorReducers);
 			screen = refreshScreen(screen);
 			store.replaceReducer(next);
 			renderEditor(screen, store);

@@ -1,8 +1,9 @@
 import Editor from './editor';
-import editorReducers from './reducers';
-import {editor as connect} from './connectors';
+import {createEditorReducers} from './reducers';
+import {createEditorConnector} from './connectors';
 
-export {Editor, editorReducers, connect};
+export {Editor, createEditorReducers, createEditorConnector};
+
 export EditorBuffer from './editor-buffer';
 export EditorBufferLine from './editor-buffer-line';
 export EditorGutter from './editor-gutter';
