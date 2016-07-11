@@ -279,7 +279,7 @@ var Editor = exports.Editor = (0, _pureRenderDecorator2.default)(_class = (0, _d
 			var active = focus ? cursor.y : -1;
 
 			var gutterWidth = getGutterWidth(gutter, matrix.length);
-			var gutterOffsetX = gutterWidth + 2;
+			var gutterOffsetX = gutterWidth > 0 ? gutterWidth + 2 : 0;
 
 			return _react2.default.createElement(
 				'box',
