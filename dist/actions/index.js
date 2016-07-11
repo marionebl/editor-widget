@@ -17,6 +17,7 @@ var GO_BACK = exports.GO_BACK = 'goBack';
 
 var EDIT_DELETE = exports.EDIT_DELETE = 'editDelete';
 var EDIT_INSERT = exports.EDIT_INSERT = 'editInsert';
+var EDIT_NEWLINE = exports.EDIT_NEWLINE = 'editNewline';
 
 exports.default = {
 	GO_UP: GO_UP,
@@ -31,5 +32,6 @@ exports.default = {
 	GO_RIGHT_INFINITY: GO_RIGHT_INFINITY,
 	GO_BACK: GO_BACK,
 	EDIT_DELETE: EDIT_DELETE,
-	EDIT_INSERT: EDIT_INSERT
+	EDIT_INSERT: EDIT_INSERT,
+	EDIT_NEWLINE: EDIT_NEWLINE
 };

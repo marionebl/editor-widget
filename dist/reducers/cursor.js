@@ -33,19 +33,28 @@ var clampPositive = (0, _fp.clamp)(0);
 function cursor() {
 	var state = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 	var action = arguments[1];
+
+	if (!action.payload) {
+		return state;
+	}
+
 	var x = state.x;
 	var y = state.y;
 	var _action$payload = action.payload;
-	var payload = _action$payload === undefined ? {} : _action$payload;
-	var _payload$content = payload.content;
-	var content = _payload$content === undefined ? '' : _payload$content;
-	var cursor = payload.cursor;
+	var _action$payload$conte = _action$payload.content;
+	var content = _action$payload$conte === undefined ? '' : _action$payload$conte;
+	var cursor = _action$payload.cursor;
 
 	var matrix = (0, _getMatrix2.default)(content);
 	var matrixLine = (0, _getMatrixLine2.default)(matrix, y);
 
 	var clampLine = clampPositive(matrix.length - 1);
 	var clampColumn = clampPositive(matrixLine.length);
+
+	// Get the current "visible" cursor position
+	var cursorLine = (0, _getMatrixLine2.default)(matrix, y);
+	var clampLineCursor = clampPositive(cursorLine.length);
+	var cursorX = clampLineCursor(x);
 
 	switch (action.type) {
 		case _actions2.default.GO_UP:
@@ -54,67 +63,92 @@ function cursor() {
 					y: clampLine(y - 1)
 				});
 			}
+
 		case _actions2.default.GO_UP_INFINITY:
 			return _extends({}, state, {
 				y: clampLine(-Infinity)
 			});
-		case _actions2.default.GO_RIGHT:
-			return _extends({}, state, {
-				x: clampColumn(x + 1)
-			});
+
+		case _actions2.default.EDIT_DELETE:
 		case _actions2.default.GO_BACK:
 			{
-				var backY = x === 0 ? y - 1 : y;
+				var backY = cursorX === 0 ? y - 1 : y;
 				var backLine = (0, _getMatrixLine2.default)(matrix, backY);
-				var backX = x === 0 ? backLine.length : x - 1;
+				var clampColumnBack = clampPositive(backLine.length);
+				var backX = cursorX === 0 ? backLine.length : x - 1;
 
 				return _extends({}, state, {
-					x: backX,
+					x: clampColumnBack(backX),
 					y: clampLine(backY)
 				});
 			}
+
+		case _actions2.default.EDIT_INSERT:
+			return _extends({}, state, {
+				x: x + 1
+			});
+
+		case _actions2.default.GO_RIGHT:
+			return _extends({}, state, {
+				x: clampColumn(cursorX + 1)
+			});
+
 		case _actions2.default.GO_RIGHT_WORD:
 			{
 				var word = (0, _getMatrixWord2.default)(matrix, cursor, 'up');
-				var intersects = cursor.x >= word.bounds[0] && cursor.x <= word.bounds[1];
+				var intersects = cursorX >= word.bounds[0] && cursorX <= word.bounds[1];
 				var bound = intersects ? word.bounds[1] : word.bounds[0];
 				return _extends({}, state, {
 					x: clampColumn(bound)
 				});
 			}
+
 		case _actions2.default.GO_RIGHT_INFINITY:
 			return _extends({}, state, {
 				x: clampColumn(Infinity)
 			});
+
+		case _actions2.default.EDIT_NEWLINE:
+			return _extends({}, state, {
+				y: y + 1,
+				x: 0
+			});
+
 		case _actions2.default.GO_DOWN:
-			{
-				return _extends({}, state, {
-					y: clampLine(y + 1)
-				});
-			}
+			return _extends({}, state, {
+				y: clampLine(y + 1)
+			});
+
 		case _actions2.default.GO_DOWN_INFINITY:
 			return _extends({}, state, {
 				y: clampLine(Infinity)
 			});
+
 		case _actions2.default.GO_LEFT:
 			return _extends({}, state, {
-				x: clampColumn(x - 1)
+				x: clampColumn(cursorX - 1)
 			});
+
 		case _actions2.default.GO_LEFT_WORD:
 			{
 				var _word = (0, _getMatrixWord2.default)(matrix, cursor, 'down');
-				var _intersects = cursor.x >= _word.bounds[0] && cursor.x <= _word.bounds[1];
+				var _intersects = cursorX >= _word.bounds[0] && cursorX <= _word.bounds[1];
 				var _bound = _intersects ? _word.bounds[0] : _word.bounds[1];
 				return _extends({}, state, {
 					x: clampColumn(_bound)
 				});
 			}
+
 		case _actions2.default.GO_LEFT_INFINITY:
 			return _extends({}, state, {
 				x: clampColumn(0)
 			});
+
 		default:
-			return state;
+			return _extends({}, state, {
+				x: clampColumn(x),
+				y: clampLine(y)
+			});
 	}
 }
 

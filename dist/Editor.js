@@ -27,8 +27,6 @@ var _pureRenderDecorator2 = _interopRequireDefault(_pureRenderDecorator);
 
 var _fp = require('lodash/fp');
 
-var _redux = require('redux');
-
 var _deepDefaults = require('./utilities/deep-defaults');
 
 var _deepDefaults2 = _interopRequireDefault(_deepDefaults);
@@ -40,10 +38,6 @@ var _getMatrix2 = _interopRequireDefault(_getMatrix);
 var _getMatrixLine = require('./utilities/get-matrix-line');
 
 var _getMatrixLine2 = _interopRequireDefault(_getMatrixLine);
-
-var _getMatrixCharacter = require('./utilities/get-matrix-character');
-
-var _getMatrixCharacter2 = _interopRequireDefault(_getMatrixCharacter);
 
 var _resolveBinding = require('./utilities/resolve-binding');
 
@@ -60,12 +54,6 @@ var _editorCursor2 = _interopRequireDefault(_editorCursor);
 var _editorGutter = require('./editor-gutter');
 
 var _editorGutter2 = _interopRequireDefault(_editorGutter);
-
-var _reducers = require('./reducers');
-
-var _reducers2 = _interopRequireDefault(_reducers);
-
-var _editor = require('./connectors/editor');
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -121,28 +109,10 @@ var Editor = exports.Editor = (0, _pureRenderDecorator2.default)(_class = (0, _d
 	}, {
 		key: 'componentDidMount',
 		value: function componentDidMount() {
-			var _this2 = this;
-
-			var props = this.props;
 			var node = this.node;
 
 			if (node) {
 				node.enableKeys();
-			}
-			if (props.stateful) {
-				(function () {
-					var combined = (0, _redux.combineReducers)(_reducers2.default);
-					var initial = (0, _fp.merge)({ contents: props.children });
-					var store = (0, _redux.createStore)(combined, initial(props));
-					var dispatchers = (0, _editor.editorMapDispatch)(store.dispatch);
-					var map = (0, _fp.merge)(dispatchers);
-
-					store.subscribe(function () {
-						var state = store.getState();
-						var mapped = map((0, _editor.editorMapProps)(state));
-						_this2.setState(mapped);
-					});
-				})();
 			}
 		}
 	}, {
@@ -218,21 +188,36 @@ var Editor = exports.Editor = (0, _pureRenderDecorator2.default)(_class = (0, _d
 	}, {
 		key: 'handleDeletion',
 		value: function handleDeletion() {
-			this.props.onGoBack(this.props);
 			this.props.onDeletion(this.props);
 		}
 	}, {
 		key: 'handleInsertion',
 		value: function handleInsertion(value) {
 			this.props.onInsertion(value, this.props);
-			this.props.onGoRight(this.props);
+		}
+	}, {
+		key: 'handleNewLine',
+		value: function handleNewLine() {
+			var props = this.props;
+
+			props.onNewLine(props);
 		}
 	}, {
 		key: 'handleInput',
 		value: function handleInput(value, character) {
+			// IMPORTANT: This seems nonsensical but isn't. Blessed
+			// will trigger two events for every enter/return keypress.
+			// We elect to use only "return" here.
+			// Pressing enter/return will always trigger both events
+			if (character.full === 'enter') {
+				return;
+			}
+
 			if (character.full === 'backspace') {
 				this.handleDeletion();
-			} else {
+			} else if (character.full === 'return') {
+				this.handleNewLine();
+			} else if (value) {
 				this.handleInsertion(value);
 			}
 		}
@@ -264,24 +249,19 @@ var Editor = exports.Editor = (0, _pureRenderDecorator2.default)(_class = (0, _d
 
 	}, {
 		key: 'render',
-		value: function render(props, state) {
-			var source = props.stateful ? state : props;
+		value: function render(props) {
+			var focus = props.focus;
+			var cursor = props.cursor;
+			var gutter = props.gutter;
+			var children = props.children;
 
-			var focus = source.focus;
-			var cursor = source.cursor;
-			var gutter = source.gutter;
-			var children = source.children;
-
-			var other = _objectWithoutProperties(source, ['focus', 'cursor', 'gutter', 'children']);
+			var other = _objectWithoutProperties(props, ['focus', 'cursor', 'gutter', 'children']);
 
 			var matrix = (0, _getMatrix2.default)(children);
 			var matrixCursorLine = (0, _getMatrixLine2.default)(matrix, cursor.y);
-			var cursorContent = (0, _getMatrixCharacter2.default)(matrix, cursor);
 			var cursorY = Math.min(matrix.length, cursor.y);
 			var cursorX = Math.min(matrixCursorLine.length, cursor.x);
-
 			var active = focus ? cursor.y : -1;
-
 			var gutterProps = (typeof gutter === 'undefined' ? 'undefined' : _typeof(gutter)) === 'object' ? gutter : {};
 
 			var gutterWidth = 'width' in gutterProps ? gutterProps.width : String(matrix.length).length + 1;
@@ -305,16 +285,12 @@ var Editor = exports.Editor = (0, _pureRenderDecorator2.default)(_class = (0, _d
 					{ left: gutterOffsetX },
 					children
 				),
-				focus && cursor && _react2.default.createElement(
-					_editorCursor2.default,
-					{
-						matrix: matrix,
-						top: cursorY,
-						left: cursorX + gutterOffsetX,
-						style: cursor.style
-					},
-					cursorContent
-				)
+				focus && cursor && _react2.default.createElement(_editorCursor2.default, {
+					matrix: matrix,
+					top: cursorY,
+					left: cursorX + gutterOffsetX,
+					style: cursor.style
+				})
 			);
 		}
 	}]);
@@ -323,7 +299,6 @@ var Editor = exports.Editor = (0, _pureRenderDecorator2.default)(_class = (0, _d
 }(_react.Component), _class2.propTypes = {
 	children: _react.PropTypes.string,
 	focus: _react.PropTypes.bool,
-	stateful: _react.PropTypes.bool,
 	onGoUp: _react.PropTypes.func.isRequired,
 	onGoRight: _react.PropTypes.func.isRequired,
 	onGoRightWord: _react.PropTypes.func.isRequired,
@@ -336,6 +311,7 @@ var Editor = exports.Editor = (0, _pureRenderDecorator2.default)(_class = (0, _d
 	onGoBack: _react.PropTypes.func.isRequired,
 	onInsertion: _react.PropTypes.func.isRequired,
 	onDeletion: _react.PropTypes.func.isRequired,
+	onNewLine: _react.PropTypes.func.isRequired,
 	cursor: _react.PropTypes.oneOfType([_react.PropTypes.bool, _react.PropTypes.shape({
 		x: _react.PropTypes.number.isRequired,
 		y: _react.PropTypes.number.isRequired,
@@ -361,7 +337,6 @@ var Editor = exports.Editor = (0, _pureRenderDecorator2.default)(_class = (0, _d
 	focus: false,
 	cursor: false,
 	gutter: false,
-	stateful: false,
 	onGoUp: _fp.noop,
 	onGoUpInfinity: _fp.noop,
 	onGoRight: _fp.noop,
@@ -375,6 +350,7 @@ var Editor = exports.Editor = (0, _pureRenderDecorator2.default)(_class = (0, _d
 	onGoBack: _fp.noop,
 	onDeletion: _fp.noop,
 	onInsertion: _fp.noop,
+	onNewLine: _fp.noop,
 	keyBindings: {
 		goLeft: ['left'],
 		goLeftWord: ['C-left'],

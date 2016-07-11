@@ -3,7 +3,7 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.EditorGutterLine = exports.EditorGutter = exports.EditorBufferLine = exports.EditorBuffer = exports.connectors = exports.reducers = exports.Editor = undefined;
+exports.EditorGutterLine = exports.EditorGutter = exports.EditorBufferLine = exports.EditorBuffer = exports.connect = exports.editorReducers = exports.Editor = undefined;
 
 var _editor = require('./editor');
 
@@ -14,8 +14,6 @@ var _reducers = require('./reducers');
 var _reducers2 = _interopRequireDefault(_reducers);
 
 var _connectors = require('./connectors');
-
-var _connectors2 = _interopRequireDefault(_connectors);
 
 var _editorBuffer = require('./editor-buffer');
 
@@ -36,8 +34,8 @@ var _editorGutterLine2 = _interopRequireDefault(_editorGutterLine);
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 exports.Editor = _editor2.default;
-exports.reducers = _reducers2.default;
-exports.connectors = _connectors2.default;
+exports.editorReducers = _reducers2.default;
+exports.connect = _connectors.editor;
 exports.EditorBuffer = _editorBuffer2.default;
 exports.EditorBufferLine = _editorBufferLine2.default;
 exports.EditorGutter = _editorGutter2.default;

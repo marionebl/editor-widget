@@ -118,6 +118,16 @@ function editorMapDispatch(dispatch) {
 					cursor: cursor
 				}
 			});
+		},
+		onNewLine: function onNewLine(_ref3) {
+			var cursor = _ref3.cursor;
+
+			dispatch({
+				type: _actions2.default.EDIT_NEWLINE,
+				payload: {
+					cursor: cursor
+				}
+			});
 		}
 	};
 }
