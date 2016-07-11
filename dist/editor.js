@@ -7,11 +7,11 @@ exports.Editor = undefined;
 
 var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 
-var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
-
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 var _class, _class2, _temp2;
+
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
 
 var _react = require('react');
 
@@ -64,6 +64,21 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+function getGutterWidth(gutter, lineCount) {
+	// Gutter is hidden
+	if (gutter === false) {
+		return 0;
+	}
+
+	// Explicit width
+	if ((typeof gutter === 'undefined' ? 'undefined' : _typeof(gutter)) === 'object' && 'width' in gutter) {
+		return gutter.width;
+	}
+
+	// Determine based on line number width
+	return String(lineCount).length + 1;
+}
 
 var Editor = exports.Editor = (0, _pureRenderDecorator2.default)(_class = (0, _deepDefaults2.default)(_class = (0, _autobindDecorator2.default)(_class = (_temp2 = _class2 = function (_Component) {
 	_inherits(Editor, _Component);
@@ -262,10 +277,8 @@ var Editor = exports.Editor = (0, _pureRenderDecorator2.default)(_class = (0, _d
 			var cursorY = Math.min(matrix.length, cursor.y);
 			var cursorX = Math.min(matrixCursorLine.length, cursor.x);
 			var active = focus ? cursor.y : -1;
-			var gutterProps = (typeof gutter === 'undefined' ? 'undefined' : _typeof(gutter)) === 'object' ? gutter : {};
 
-			var gutterWidth = 'width' in gutterProps ? gutterProps.width : String(matrix.length).length + 1;
-
+			var gutterWidth = getGutterWidth(gutter, matrix.length);
 			var gutterOffsetX = gutterWidth + 2;
 
 			return _react2.default.createElement(
@@ -276,7 +289,7 @@ var Editor = exports.Editor = (0, _pureRenderDecorator2.default)(_class = (0, _d
 				}),
 				gutter && _react2.default.createElement(_editorGutter2.default, _extends({
 					width: gutterWidth
-				}, gutterProps, {
+				}, gutter, {
 					lines: matrix.length,
 					active: active
 				})),

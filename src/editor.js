@@ -12,6 +12,21 @@ import EditorBuffer from './editor-buffer';
 import EditorCursor from './editor-cursor';
 import EditorGutter from './editor-gutter';
 
+function getGutterWidth(gutter, lineCount) {
+	// Gutter is hidden
+	if (gutter === false) {
+		return 0;
+	}
+
+	// Explicit width
+	if (typeof gutter === 'object' && 'width' in gutter) {
+		return gutter.width;
+	}
+
+	// Determine based on line number width
+	return String(lineCount).length + 1;
+}
+
 @pure
 @deep
 @autobind
@@ -253,13 +268,9 @@ export class Editor extends Component {
 		const cursorY = Math.min(matrix.length, cursor.y);
 		const cursorX = Math.min(matrixCursorLine.length, cursor.x);
 		const active = focus ? cursor.y : -1;
-		const gutterProps = typeof gutter === 'object' ? gutter : {};
 
-		const gutterWidth = 'width' in gutterProps ?
-			gutterProps.width :
-			String(matrix.length).length + 1;
-
-		const gutterOffsetX = gutterWidth + 2;
+		const gutterWidth = getGutterWidth(gutter, matrix.length);
+		const gutterOffsetX = gutterWidth > 0 ? gutterWidth + 2 : 0;
 
 		return (
 			<box
@@ -271,7 +282,7 @@ export class Editor extends Component {
 					gutter &&
 						<EditorGutter
 							width={gutterWidth}
-							{...gutterProps}
+							{...gutter}
 							lines={matrix.length}
 							active={active}
 							/>

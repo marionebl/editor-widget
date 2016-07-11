@@ -25,7 +25,6 @@ function renderEditor(screen, store) {
 function getStore(reducers, contents, screen) {
 	const initial = {
 		contents,
-		gutter: true,
 		focus: true,
 		cursor: {
 			x: 0,
