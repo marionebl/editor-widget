@@ -1,8 +1,18 @@
 import Editor from './editor';
 import {createEditorReducers} from './reducers';
-import {createEditorConnector} from './connectors';
+import {
+	createEditorConnector,
+	createEditorMapDispatch,
+	createEditorMapProps
+} from './connectors';
 
-export {Editor, createEditorReducers, createEditorConnector};
+export {
+	Editor,
+	createEditorReducers,
+	createEditorConnector,
+	createEditorMapDispatch,
+	createEditorMapProps
+};
 
 export EditorBuffer from './editor-buffer';
 export EditorBufferLine from './editor-buffer-line';

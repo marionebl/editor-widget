@@ -150,6 +150,8 @@ var Editor = exports.Editor = (0, _pureRenderDecorator2.default)(_class = (0, _d
 			var props = this.props;
 
 
+			props.onNavigation(props, binding);
+
 			switch (binding) {
 				/**
      * ↑
@@ -243,6 +245,7 @@ var Editor = exports.Editor = (0, _pureRenderDecorator2.default)(_class = (0, _d
 			var keyBindings = _props.keyBindings;
 			var focus = _props.focus;
 
+
 			if (!focus) {
 				return;
 			}
@@ -312,6 +315,8 @@ var Editor = exports.Editor = (0, _pureRenderDecorator2.default)(_class = (0, _d
 }(_react.Component), _class2.propTypes = {
 	children: _react.PropTypes.string,
 	focus: _react.PropTypes.bool,
+	onNavigation: _react.PropTypes.func.isRequired,
+	onEdit: _react.PropTypes.func.isRequired,
 	onGoUp: _react.PropTypes.func.isRequired,
 	onGoRight: _react.PropTypes.func.isRequired,
 	onGoRightWord: _react.PropTypes.func.isRequired,
@@ -348,8 +353,13 @@ var Editor = exports.Editor = (0, _pureRenderDecorator2.default)(_class = (0, _d
 }, _class2.defaultProps = {
 	children: '',
 	focus: false,
-	cursor: false,
+	cursor: {
+		x: 0,
+		y: 0
+	},
 	gutter: false,
+	onNavigation: _fp.noop,
+	onEdit: _fp.noop,
 	onGoUp: _fp.noop,
 	onGoUpInfinity: _fp.noop,
 	onGoRight: _fp.noop,

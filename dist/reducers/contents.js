@@ -17,7 +17,8 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 function getCharacterIndex(matrix, x, y) {
 	var lines = matrix.slice(0, y);
-	var clampedX = Math.min(x, matrix[y].length);
+	var line = matrix[y] || [];
+	var clampedX = Math.min(x, line.length);
 	var column = Math.max(0, clampedX);
 	return lines.reduce(function (sum, line) {
 		return sum + line.length + 1;

@@ -31,7 +31,11 @@ function renderEditor(screen, store) {
 	return (0, _reactBlessed.render)(_react2.default.createElement(
 		_reactRedux.Provider,
 		{ store: store },
-		_react2.default.createElement(Application, null)
+		_react2.default.createElement(
+			'box',
+			{ top: 5, left: 10 },
+			_react2.default.createElement(Application, null)
+		)
 	), screen);
 }
 
@@ -39,6 +43,7 @@ function getStore(reducers, contents, screen) {
 	var initial = {
 		contents: contents,
 		focus: true,
+		gutter: true,
 		cursor: {
 			x: 0,
 			y: 0

@@ -1,9 +1,12 @@
 import React, {Component, PropTypes as t} from 'react';
-import pure from 'pure-render-decorator';
 import deep from './utilities/deep-defaults';
 import autobind from 'autobind-decorator';
 
-@pure
+function updateCursor(program, top, left) {
+	program.showCursor();
+	program.cursorPos(top, left);
+}
+
 @deep
 @autobind
 class EditorCursor extends Component {
@@ -31,32 +34,34 @@ class EditorCursor extends Component {
 	 * Helper methods
 	 */
 	saveNode(ref) {
-		const {screen} = ref;
-		const {program} = screen;
-		this.node = ref;
-		this.screen = screen;
-		this.program = program;
+		if (ref) {
+			const {screen} = ref;
+			const {program} = screen;
+			this.node = ref;
+			this.screen = screen;
+			this.program = program;
+		}
+	}
+
+	handlePosition() {
+		const {program, node} = this;
+		const {top, left} = this.props;
+		const offsetTop = node ? node.atop : 0;
+		const offsetLeft = node ? node.aleft : 0;
+		if (program) {
+			updateCursor(program, top + offsetTop, left + offsetLeft);
+		}
 	}
 
 	/**
 	 * Component lifecycle hooks
 	 */
 	componentDidMount() {
-		const {program} = this;
-		const {top, left} = this.props;
-		if (program) {
-			program.showCursor();
-			program.cursorPos(top, left);
-		}
+		this.handlePosition();
 	}
 
 	componentDidUpdate() {
-		const {program} = this;
-		const {top, left} = this.props;
-		if (program) {
-			program.showCursor();
-			program.cursorPos(top, left);
-		}
+		this.handlePosition();
 	}
 
 	render() {

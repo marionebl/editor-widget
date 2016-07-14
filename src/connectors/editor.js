@@ -12,13 +12,15 @@ export function createEditorMapProps(ident, propMapper = {}) {
 	return state => {
 		const subState = ident ? state[ident] : state;
 
-		return {
+		const mapping = {
 			children: subState.contents,
 			focus: subState.focus,
 			cursor: subState.cursor,
 			gutter: subState.gutter,
 			...propMapper
 		};
+
+		return ident ? {[ident]: mapping} : mapping;
 	};
 }
 
@@ -39,7 +41,7 @@ export function createEditorMapDispatch(ident, dispatchMapper = {}) {
 			};
 		}
 
-		return {
+		const dispatchers = {
 			onGoUp(props) {
 				getDispatcher('onGoUp', {
 					type: actions.GO_UP,
@@ -130,6 +132,8 @@ export function createEditorMapDispatch(ident, dispatchMapper = {}) {
 				})();
 			}
 		};
+
+		return ident ? {[ident]: dispatchers} : dispatchers;
 	};
 }
 

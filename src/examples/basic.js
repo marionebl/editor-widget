@@ -16,7 +16,9 @@ function renderEditor(screen, store) {
 
 	return render(
 		<Provider store={store}>
-			<Application/>
+			<box top={5} left={10}>
+				<Application/>
+			</box>
 		</Provider>,
 		screen
 	);
@@ -26,6 +28,7 @@ function getStore(reducers, contents, screen) {
 	const initial = {
 		contents,
 		focus: true,
+		gutter: true,
 		cursor: {
 			x: 0,
 			y: 0

@@ -1,9 +1,9 @@
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
-  value: true
+	value: true
 });
-exports.EditorGutterLine = exports.EditorGutter = exports.EditorBufferLine = exports.EditorBuffer = exports.createEditorConnector = exports.createEditorReducers = exports.Editor = undefined;
+exports.EditorGutterLine = exports.EditorGutter = exports.EditorBufferLine = exports.EditorBuffer = exports.createEditorMapProps = exports.createEditorMapDispatch = exports.createEditorConnector = exports.createEditorReducers = exports.Editor = undefined;
 
 var _editor = require('./editor');
 
@@ -34,6 +34,8 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 exports.Editor = _editor2.default;
 exports.createEditorReducers = _reducers.createEditorReducers;
 exports.createEditorConnector = _connectors.createEditorConnector;
+exports.createEditorMapDispatch = _connectors.createEditorMapDispatch;
+exports.createEditorMapProps = _connectors.createEditorMapProps;
 exports.EditorBuffer = _editorBuffer2.default;
 exports.EditorBufferLine = _editorBufferLine2.default;
 exports.EditorGutter = _editorGutter2.default;

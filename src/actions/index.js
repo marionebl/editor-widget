@@ -1,20 +1,20 @@
 import {entries} from 'lodash/fp';
 
-const GO_UP = 'goUp';
-const GO_UP_INFINITY = 'goUpInfinity';
-const GO_LEFT = 'goLeft';
-const GO_LEFT_WORD = 'goLeftWord';
-const GO_LEFT_INFINITY = 'goLeftInfinity';
-const GO_DOWN = 'goDown';
-const GO_DOWN_INFINITY = 'goDownInfinity';
-const GO_RIGHT = 'goRight';
-const GO_RIGHT_WORD = 'goRightWord';
-const GO_RIGHT_INFINITY = 'goRightInfinity';
-const GO_BACK = 'goBack';
+const GO_UP = 'react-blessed-editor/cursor/goUp';
+const GO_UP_INFINITY = 'react-blessed-editor/cursor/goUpInfinity';
+const GO_LEFT = 'react-blessed-editor/cursor/goLeft';
+const GO_LEFT_WORD = 'react-blessed-editor/cursor/goLeftWord';
+const GO_LEFT_INFINITY = 'react-blessed-editor/cursor/goLeftInfinity';
+const GO_DOWN = 'react-blessed-editor/cursor/goDown';
+const GO_DOWN_INFINITY = 'react-blessed-editor/cursor/goDownInfinity';
+const GO_RIGHT = 'react-blessed-editor/cursor/goRight';
+const GO_RIGHT_WORD = 'react-blessed-editor/cursor/goRightWord';
+const GO_RIGHT_INFINITY = 'react-blessed-editor/cursor/goRightInfinity';
+const GO_BACK = 'react-blessed-editor/cursor/goBack';
 
-const EDIT_DELETE = 'editDelete';
-const EDIT_INSERT = 'editInsert';
-const EDIT_NEWLINE = 'editNewline';
+const EDIT_DELETE = 'react-blessed-editor/contents/editDelete';
+const EDIT_INSERT = 'react-blessed-editor/contents/editInsert';
+const EDIT_NEWLINE = 'react-blessed-editor/contents/editNewline';
 
 export function createActions(ident = '') {
 	const actions = {

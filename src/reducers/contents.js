@@ -3,7 +3,8 @@ import createActions from '../actions';
 
 function getCharacterIndex(matrix, x, y) {
 	const lines = matrix.slice(0, y);
-	const clampedX = Math.min(x, matrix[y].length);
+	const line = matrix[y] || [];
+	const clampedX = Math.min(x, line.length);
 	const column = Math.max(0, clampedX);
 	return lines.reduce((sum, line) => sum + line.length + 1, column);
 }

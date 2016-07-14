@@ -1,7 +1,13 @@
-import createEditorConnector from './editor';
+import {
+	createEditorConnector,
+	createEditorMapDispatch,
+	createEditorMapProps
+} from './editor';
 
 export {
-	createEditorConnector
+	createEditorConnector,
+	createEditorMapDispatch,
+	createEditorMapProps
 };
 
 export default {

@@ -37,6 +37,8 @@ export class Editor extends Component {
 	static propTypes = {
 		children: t.string,
 		focus: t.bool,
+		onNavigation: t.func.isRequired,
+		onEdit: t.func.isRequired,
 		onGoUp: t.func.isRequired,
 		onGoRight: t.func.isRequired,
 		onGoRightWord: t.func.isRequired,
@@ -81,8 +83,13 @@ export class Editor extends Component {
 	static defaultProps = {
 		children: '',
 		focus: false,
-		cursor: false,
+		cursor: {
+			x: 0,
+			y: 0
+		},
 		gutter: false,
+		onNavigation: noop,
+		onEdit: noop,
 		onGoUp: noop,
 		onGoUpInfinity: noop,
 		onGoRight: noop,
@@ -151,6 +158,8 @@ export class Editor extends Component {
 	 */
 	handleBinding(binding) {
 		const {props} = this;
+
+		props.onNavigation(props, binding);
 
 		switch (binding) {
 			/**
@@ -236,6 +245,7 @@ export class Editor extends Component {
 
 	handleKeypress(value, character) {
 		const {keyBindings, focus} = this.props;
+
 		if (!focus) {
 			return;
 		}

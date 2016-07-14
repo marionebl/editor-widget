@@ -10,21 +10,21 @@ exports.createActions = createActions;
 
 var _fp = require('lodash/fp');
 
-var GO_UP = 'goUp';
-var GO_UP_INFINITY = 'goUpInfinity';
-var GO_LEFT = 'goLeft';
-var GO_LEFT_WORD = 'goLeftWord';
-var GO_LEFT_INFINITY = 'goLeftInfinity';
-var GO_DOWN = 'goDown';
-var GO_DOWN_INFINITY = 'goDownInfinity';
-var GO_RIGHT = 'goRight';
-var GO_RIGHT_WORD = 'goRightWord';
-var GO_RIGHT_INFINITY = 'goRightInfinity';
-var GO_BACK = 'goBack';
+var GO_UP = 'react-blessed-editor/cursor/goUp';
+var GO_UP_INFINITY = 'react-blessed-editor/cursor/goUpInfinity';
+var GO_LEFT = 'react-blessed-editor/cursor/goLeft';
+var GO_LEFT_WORD = 'react-blessed-editor/cursor/goLeftWord';
+var GO_LEFT_INFINITY = 'react-blessed-editor/cursor/goLeftInfinity';
+var GO_DOWN = 'react-blessed-editor/cursor/goDown';
+var GO_DOWN_INFINITY = 'react-blessed-editor/cursor/goDownInfinity';
+var GO_RIGHT = 'react-blessed-editor/cursor/goRight';
+var GO_RIGHT_WORD = 'react-blessed-editor/cursor/goRightWord';
+var GO_RIGHT_INFINITY = 'react-blessed-editor/cursor/goRightInfinity';
+var GO_BACK = 'react-blessed-editor/cursor/goBack';
 
-var EDIT_DELETE = 'editDelete';
-var EDIT_INSERT = 'editInsert';
-var EDIT_NEWLINE = 'editNewline';
+var EDIT_DELETE = 'react-blessed-editor/contents/editDelete';
+var EDIT_INSERT = 'react-blessed-editor/contents/editInsert';
+var EDIT_NEWLINE = 'react-blessed-editor/contents/editNewline';
 
 function createActions() {
 	var ident = arguments.length <= 0 || arguments[0] === undefined ? '' : arguments[0];
