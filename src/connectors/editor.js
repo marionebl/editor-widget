@@ -8,7 +8,7 @@ function editorMapPayload({children, cursor}) {
 	};
 }
 
-export function createEditorMapProps(ident) {
+export function createEditorMapProps(ident, propMapper = {}) {
 	return state => {
 		const subState = ident ? state[ident] : state;
 
@@ -16,112 +16,126 @@ export function createEditorMapProps(ident) {
 			children: subState.contents,
 			focus: subState.focus,
 			cursor: subState.cursor,
-			gutter: subState.gutter
+			gutter: subState.gutter,
+			...propMapper
 		};
 	};
 }
 
-export function createEditorMapDispatch(ident) {
+export function createEditorMapDispatch(ident, dispatchMapper = {}) {
 	const actions = createActions(ident);
 
-	return dispatch => {
+	return basicDispatch => {
+		function getDispatcher(name, action) {
+			return () => {
+				const mappedDispatch = typeof dispatchMapper[name] === 'function' ?
+					dispatchMapper[name] :
+					() => true;
+
+				const result = mappedDispatch(action);
+				if (result !== false) {
+					basicDispatch(action);
+				}
+			};
+		}
+
 		return {
 			onGoUp(props) {
-				dispatch({
+				getDispatcher('onGoUp', {
 					type: actions.GO_UP,
 					payload: editorMapPayload(props)
-				});
+				})();
 			},
 			onGoUpInfinity(props) {
-				dispatch({
+				getDispatcher('onGoUpInfinity', {
 					type: actions.GO_UP_INFINITY,
 					payload: editorMapPayload(props)
-				});
+				})();
 			},
 			onGoRight(props) {
-				dispatch({
+				getDispatcher('onGoRight', {
 					type: actions.GO_RIGHT,
 					payload: editorMapPayload(props)
-				});
+				})();
 			},
 			onGoRightWord(props) {
-				dispatch({
+				getDispatcher('onGoRightWord', {
 					type: actions.GO_RIGHT_WORD,
 					payload: editorMapPayload(props)
-				});
+				})();
 			},
 			onGoRightInfinity(props) {
-				dispatch({
+				getDispatcher('onGoRightInfinity', {
 					type: actions.GO_RIGHT_INFINITY,
 					payload: editorMapPayload(props)
-				});
+				})();
 			},
 			onGoDown(props) {
-				dispatch({
+				getDispatcher('onGoDown', {
 					type: actions.GO_DOWN,
 					payload: editorMapPayload(props)
-				});
+				})();
 			},
 			onGoDownInfinity(props) {
-				dispatch({
+				getDispatcher('onGoDownInfinity', {
 					type: actions.GO_DOWN_INFINITY,
 					payload: editorMapPayload(props)
-				});
+				})();
 			},
 			onGoLeft(props) {
-				dispatch({
+				getDispatcher('onGoLeft', {
 					type: actions.GO_LEFT,
 					payload: editorMapPayload(props)
-				});
+				})();
 			},
 			onGoLeftWord(props) {
-				dispatch({
+				getDispatcher('onGoLeftWord', {
 					type: actions.GO_LEFT_WORD,
 					payload: editorMapPayload(props)
-				});
+				})();
 			},
 			onGoLeftInfinity(props) {
-				dispatch({
+				getDispatcher('onGoLeftInfinity', {
 					type: actions.GO_LEFT_INFINITY,
 					payload: editorMapPayload(props)
-				});
+				})();
 			},
 			onGoBack(props) {
-				dispatch({
+				getDispatcher('onGoBack', {
 					type: actions.GO_BACK,
 					payload: editorMapPayload(props)
-				});
+				})();
 			},
 			onDeletion(props) {
-				dispatch({
+				getDispatcher('onDeletion', {
 					type: actions.EDIT_DELETE,
 					payload: editorMapPayload(props)
-				});
+				})();
 			},
 			onInsertion(value, {cursor}) {
-				dispatch({
+				getDispatcher('onInsertion', {
 					type: actions.EDIT_INSERT,
 					payload: {
 						value,
 						cursor
 					}
-				});
+				})();
 			},
 			onNewLine({cursor}) {
-				dispatch({
+				getDispatcher('onNewLine', {
 					type: actions.EDIT_NEWLINE,
 					payload: {
 						cursor
 					}
-				});
+				})();
 			}
 		};
 	};
 }
 
-export function createEditorConnector(ident) {
-	const mapProps = createEditorMapProps(ident);
-	const mapDispatch = createEditorMapDispatch(ident);
+export function createEditorConnector(ident, propMapper = {}, dispatchMapper = {}) {
+	const mapProps = createEditorMapProps(ident, propMapper);
+	const mapDispatch = createEditorMapDispatch(ident, dispatchMapper);
 	return connect(mapProps, mapDispatch);
 }
 
