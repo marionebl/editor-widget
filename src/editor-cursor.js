@@ -10,7 +10,6 @@ class EditorCursor extends Component {
 	static propTypes = {
 		top: t.number.isRequired,
 		left: t.number.isRequired,
-		children: t.string.isRequired,
 		style: t.any
 	};
 
@@ -62,7 +61,11 @@ class EditorCursor extends Component {
 
 	render() {
 		return (
-			<box ref={this.saveNode} width={0} height={0}/>
+			<box
+				ref={this.saveNode}
+				width={0}
+				height={0}
+				/>
 		);
 	}
 }
