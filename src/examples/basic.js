@@ -16,9 +16,7 @@ function renderEditor(screen, store) {
 
 	return render(
 		<Provider store={store}>
-			<box top={5} left={10}>
-				<Application/>
-			</box>
+			<Application/>
 		</Provider>,
 		screen
 	);
@@ -43,7 +41,7 @@ function getStore(reducers, contents, screen) {
 		})
 	);
 
-	const store = createStore(reducers, initial, middlwares);
+	const store = createStore(reducers, initial, /* middlwares */);
 	return store;
 }
 
@@ -64,6 +62,7 @@ function getScreen() {
 
 function refreshScreen(screen) {
 	screen.destroy();
+	screen.removeAllListeners();
 	return getScreen();
 }
 

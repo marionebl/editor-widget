@@ -52,6 +52,7 @@ class EditorGutter extends Component {
 			<box {...other} wrap={false}>
 				{
 					getRange(lines).map((line, y) => {
+						const isActive = y === active - offset;
 						return (
 							<EditorGutterLine
 								width={width}
@@ -59,7 +60,7 @@ class EditorGutter extends Component {
 								activeStyle={activeStyle}
 								top={y}
 								key={y}
-								active={y === active - offset}
+								active={isActive}
 								currentLine={style.currentLine}
 								>
 								{String(line)}

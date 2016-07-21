@@ -1,6 +1,7 @@
 import React, {Component, PropTypes as t} from 'react';
 import autobind from 'autobind-decorator';
 import pure from 'pure-render-decorator';
+import {clamp} from 'lodash';
 import {noop} from 'lodash/fp';
 
 import deep from './utilities/deep-defaults';
@@ -128,6 +129,11 @@ export class Editor extends Component {
 	program = null;
 	store = null;
 
+	state = {
+		height: 0,
+		width: 0
+	};
+
 	/**
 	 * Helper methods
 	 */
@@ -143,6 +149,10 @@ export class Editor extends Component {
 		const {node} = this;
 		if (node) {
 			node.enableKeys();
+			this.setState({
+				width: node.width,
+				height: node.height
+			});
 		}
 	}
 
@@ -264,7 +274,7 @@ export class Editor extends Component {
 	 * - basic and cheap display value computation
 	 * - invocation of sub components
 	 */
-	render(props) {
+	render(props, state) {
 		const {
 			focus,
 			cursor,
@@ -273,18 +283,27 @@ export class Editor extends Component {
 			...other
 		} = props;
 
+		const {
+			width,
+			height
+		} = state;
+
 		const matrix = getMatrix(children);
 		const matrixCursorLine = getMatrixLine(matrix, cursor.y);
-		const cursorY = Math.min(matrix.length, cursor.y);
-		const cursorX = Math.min(matrixCursorLine.length, cursor.x);
-		const active = focus ? cursor.y : -1;
-
 		const gutterWidth = getGutterWidth(gutter, matrix.length);
 		const gutterOffsetX = gutterWidth > 0 ? gutterWidth + 2 : 0;
+
+		const cursorY = clamp(cursor.y, 0, Math.min(height - 1, matrix.length));
+		const cursorX = clamp(cursor.x, 0, Math.min(width - gutterOffsetX - 1, matrixCursorLine.length));
+		const scrollY = clamp(cursor.y - height + 1, 0, matrix.length);
+		const scrollX = clamp(cursor.x - width + 1, 0, matrixCursorLine.length);
+		const active = focus ? cursor.y : -1;
 
 		return (
 			<box
 				{...other}
+				width={30}
+				height={20}
 				ref={this.saveNode}
 				onKeypress={this.handleKeypress}
 				>
@@ -293,12 +312,17 @@ export class Editor extends Component {
 						<EditorGutter
 							width={gutterWidth}
 							{...gutter}
-							lines={matrix.length}
+							offset={scrollY}
+							lines={height}
 							active={active}
 							/>
 				}
 				{
-					<EditorBuffer left={gutterOffsetX}>
+					<EditorBuffer
+						offsetY={scrollY}
+						maxY={height}
+						left={gutterOffsetX}
+						>
 						{children}
 					</EditorBuffer>
 				}
