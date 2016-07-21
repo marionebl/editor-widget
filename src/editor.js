@@ -153,6 +153,7 @@ export class Editor extends Component {
 				width: node.width,
 				height: node.height
 			});
+			node.screen.on('resize', this.handleScreenResize);
 		}
 	}
 
@@ -160,12 +161,23 @@ export class Editor extends Component {
 		const {node} = this;
 		if (node) {
 			node.off('keypress');
+			node.screen.off('resize', this.handleScreenResize);
 		}
 	}
 
 	/**
 	 * Event handlers
 	 */
+	handleScreenResize() {
+		const {node} = this;
+		if (node) {
+			this.setState({
+				width: node.width,
+				height: node.height
+			});
+		}
+	}
+
 	handleBinding(binding) {
 		const {props} = this;
 
@@ -296,14 +308,12 @@ export class Editor extends Component {
 		const cursorY = clamp(cursor.y, 0, Math.min(height - 1, matrix.length));
 		const cursorX = clamp(cursor.x, 0, Math.min(width - gutterOffsetX - 1, matrixCursorLine.length));
 		const scrollY = clamp(cursor.y - height + 1, 0, matrix.length);
-		const scrollX = clamp(cursor.x - width + 1, 0, matrixCursorLine.length);
+		const scrollX = clamp(cursor.x - width + 1 + gutterOffsetX, 0, matrixCursorLine.length);
 		const active = focus ? cursor.y : -1;
 
 		return (
 			<box
 				{...other}
-				width={30}
-				height={20}
 				ref={this.saveNode}
 				onKeypress={this.handleKeypress}
 				>
@@ -319,6 +329,7 @@ export class Editor extends Component {
 				}
 				{
 					<EditorBuffer
+						offsetX={scrollX}
 						offsetY={scrollY}
 						maxY={height}
 						left={gutterOffsetX}

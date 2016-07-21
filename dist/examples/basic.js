@@ -31,11 +31,7 @@ function renderEditor(screen, store) {
 	return (0, _reactBlessed.render)(_react2.default.createElement(
 		_reactRedux.Provider,
 		{ store: store },
-		_react2.default.createElement(
-			'box',
-			{ top: 5, left: 10 },
-			_react2.default.createElement(Application, null)
-		)
+		_react2.default.createElement(Application, null)
 	), screen);
 }
 
@@ -56,7 +52,7 @@ function getStore(reducers, contents, screen) {
 		}
 	}));
 
-	var store = (0, _redux.createStore)(reducers, initial, middlwares);
+	var store = (0, _redux.createStore)(reducers, initial);
 	return store;
 }
 
@@ -77,6 +73,7 @@ function getScreen() {
 
 function refreshScreen(screen) {
 	screen.destroy();
+	screen.removeAllListeners();
 	return getScreen();
 }
 

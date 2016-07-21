@@ -25,6 +25,8 @@ var _pureRenderDecorator = require('pure-render-decorator');
 
 var _pureRenderDecorator2 = _interopRequireDefault(_pureRenderDecorator);
 
+var _lodash = require('lodash');
+
 var _fp = require('lodash/fp');
 
 var _deepDefaults = require('./utilities/deep-defaults');
@@ -94,7 +96,10 @@ var Editor = exports.Editor = (0, _pureRenderDecorator2.default)(_class = (0, _d
 			args[_key] = arguments[_key];
 		}
 
-		return _ret = (_temp = (_this = _possibleConstructorReturn(this, (_Object$getPrototypeO = Object.getPrototypeOf(Editor)).call.apply(_Object$getPrototypeO, [this].concat(args))), _this), _this.node = null, _this.screen = null, _this.program = null, _this.store = null, _temp), _possibleConstructorReturn(_this, _ret);
+		return _ret = (_temp = (_this = _possibleConstructorReturn(this, (_Object$getPrototypeO = Object.getPrototypeOf(Editor)).call.apply(_Object$getPrototypeO, [this].concat(args))), _this), _this.node = null, _this.screen = null, _this.program = null, _this.store = null, _this.state = {
+			height: 0,
+			width: 0
+		}, _temp), _possibleConstructorReturn(_this, _ret);
 	}
 	/**
   * Class properties
@@ -128,6 +133,11 @@ var Editor = exports.Editor = (0, _pureRenderDecorator2.default)(_class = (0, _d
 
 			if (node) {
 				node.enableKeys();
+				this.setState({
+					width: node.width,
+					height: node.height
+				});
+				node.screen.on('resize', this.handleScreenResize);
 			}
 		}
 	}, {
@@ -137,6 +147,7 @@ var Editor = exports.Editor = (0, _pureRenderDecorator2.default)(_class = (0, _d
 
 			if (node) {
 				node.off('keypress');
+				node.screen.off('resize', this.handleScreenResize);
 			}
 		}
 
@@ -144,6 +155,18 @@ var Editor = exports.Editor = (0, _pureRenderDecorator2.default)(_class = (0, _d
    * Event handlers
    */
 
+	}, {
+		key: 'handleScreenResize',
+		value: function handleScreenResize() {
+			var node = this.node;
+
+			if (node) {
+				this.setState({
+					width: node.width,
+					height: node.height
+				});
+			}
+		}
 	}, {
 		key: 'handleBinding',
 		value: function handleBinding(binding) {
@@ -267,7 +290,7 @@ var Editor = exports.Editor = (0, _pureRenderDecorator2.default)(_class = (0, _d
 
 	}, {
 		key: 'render',
-		value: function render(props) {
+		value: function render(props, state) {
 			var focus = props.focus;
 			var cursor = props.cursor;
 			var gutter = props.gutter;
@@ -275,14 +298,20 @@ var Editor = exports.Editor = (0, _pureRenderDecorator2.default)(_class = (0, _d
 
 			var other = _objectWithoutProperties(props, ['focus', 'cursor', 'gutter', 'children']);
 
+			var width = state.width;
+			var height = state.height;
+
+
 			var matrix = (0, _getMatrix2.default)(children);
 			var matrixCursorLine = (0, _getMatrixLine2.default)(matrix, cursor.y);
-			var cursorY = Math.min(matrix.length, cursor.y);
-			var cursorX = Math.min(matrixCursorLine.length, cursor.x);
-			var active = focus ? cursor.y : -1;
-
 			var gutterWidth = getGutterWidth(gutter, matrix.length);
 			var gutterOffsetX = gutterWidth > 0 ? gutterWidth + 2 : 0;
+
+			var cursorY = (0, _lodash.clamp)(cursor.y, 0, Math.min(height - 1, matrix.length));
+			var cursorX = (0, _lodash.clamp)(cursor.x, 0, Math.min(width - gutterOffsetX - 1, matrixCursorLine.length));
+			var scrollY = (0, _lodash.clamp)(cursor.y - height + 1, 0, matrix.length);
+			var scrollX = (0, _lodash.clamp)(cursor.x - width + 1 + gutterOffsetX, 0, matrixCursorLine.length);
+			var active = focus ? cursor.y : -1;
 
 			return _react2.default.createElement(
 				'box',
@@ -293,12 +322,18 @@ var Editor = exports.Editor = (0, _pureRenderDecorator2.default)(_class = (0, _d
 				gutter && _react2.default.createElement(_editorGutter2.default, _extends({
 					width: gutterWidth
 				}, gutter, {
-					lines: matrix.length,
+					offset: scrollY,
+					lines: height,
 					active: active
 				})),
 				_react2.default.createElement(
 					_editorBuffer2.default,
-					{ left: gutterOffsetX },
+					{
+						offsetX: scrollX,
+						offsetY: scrollY,
+						maxY: height,
+						left: gutterOffsetX
+					},
 					children
 				),
 				focus && cursor && _react2.default.createElement(_editorCursor2.default, {

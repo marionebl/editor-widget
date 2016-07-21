@@ -25,6 +25,8 @@ var _pureRenderDecorator = require('pure-render-decorator');
 
 var _pureRenderDecorator2 = _interopRequireDefault(_pureRenderDecorator);
 
+var _lodash = require('lodash');
+
 var _deepDefaults = require('./utilities/deep-defaults');
 
 var _deepDefaults2 = _interopRequireDefault(_deepDefaults);
@@ -106,21 +108,24 @@ var EditorBuffer = exports.EditorBuffer = (0, _pureRenderDecorator2.default)(_cl
 			var children = props.children;
 			var offsetX = props.offsetX;
 			var offsetY = props.offsetY;
+			var left = props.left;
+			var maxY = props.maxY;
 
-			var _highlightAuto = (0, _emphasize.highlightAuto)(children);
-
-			var content = _highlightAuto.value;
+			//		const {value: content} = highlightAuto(children);
 
 			var lines = children.split('\n');
+			var upperBound = (0, _lodash.clamp)(maxY + offsetY, offsetY, lines.length);
+			var visibleLines = lines.slice(offsetY, upperBound);
 
 			return _react2.default.createElement(
 				'box',
 				_extends({}, props, {
 					ref: this.reference('root'),
 					wrap: false,
-					tags: false
+					tags: false,
+					left: left - offsetX
 				}),
-				lines.map(function (line, y) {
+				visibleLines.map(function (line, y) {
 					var intersectsRow = y + offsetY;
 
 					return _react2.default.createElement(
@@ -128,8 +133,7 @@ var EditorBuffer = exports.EditorBuffer = (0, _pureRenderDecorator2.default)(_cl
 						{
 							top: y,
 							key: y,
-							row: intersectsRow,
-							column: offsetX
+							row: intersectsRow
 						},
 						line
 					);
@@ -140,9 +144,13 @@ var EditorBuffer = exports.EditorBuffer = (0, _pureRenderDecorator2.default)(_cl
 
 	return EditorBuffer;
 }(_react.Component), _class3.defaultProps = {
-	lines: []
+	lines: [],
+	offsetY: 0,
+	maxY: Infinity
 }, _class3.propTypes = {
 	children: _react.PropTypes.string,
+	offsetY: _react.PropTypes.number.isRequired,
+	maxY: _react.PropTypes.number.isRequired,
 	lines: _react.PropTypes.arrayOf(_react.PropTypes.string).isRequired
 }, _temp2), (_applyDecoratedDescriptor(_class2.prototype, 'reference', [_autobindDecorator2.default], Object.getOwnPropertyDescriptor(_class2.prototype, 'reference'), _class2.prototype)), _class2)) || _class) || _class;
 

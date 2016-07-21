@@ -41,6 +41,7 @@ export class EditorBuffer extends Component {
 			children,
 			offsetX,
 			offsetY,
+			left,
 			maxY
 		} = props;
 
@@ -56,6 +57,7 @@ export class EditorBuffer extends Component {
 				ref={this.reference('root')}
 				wrap={false}
 				tags={false}
+				left={left - offsetX}
 				>
 				{
 					visibleLines.map((line, y) => {
@@ -66,7 +68,6 @@ export class EditorBuffer extends Component {
 								top={y}
 								key={y}
 								row={intersectsRow}
-								column={offsetX}
 								>
 								{line}
 							</EditorBufferLine>

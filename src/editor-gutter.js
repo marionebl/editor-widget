@@ -1,6 +1,7 @@
 import React, {Component, PropTypes as t} from 'react';
 import {times} from 'lodash/fp';
 
+import autobind from 'autobind-decorator';
 import pure from 'pure-render-decorator';
 
 import EditorGutterLine from './editor-gutter-line';
@@ -9,6 +10,7 @@ import deep from './utilities/deep-defaults';
 
 @pure
 @deep
+@autobind
 class EditorGutter extends Component {
 	static propTypes = {
 		lines: t.number.isRequired,
@@ -34,6 +36,17 @@ class EditorGutter extends Component {
 		width: 6
 	};
 
+	componentDidMount() {
+		const {node} = this;
+		if (node) {
+			node.setIndex(1);
+		}
+	}
+
+	saveNode(ref) {
+		this.node = ref;
+	}
+
 	render(props) {
 		const {
 			lines,
@@ -49,7 +62,12 @@ class EditorGutter extends Component {
 		const getRange = times(account);
 
 		return (
-			<box {...other} wrap={false}>
+			<box
+				{...other}
+				ref={this.saveNode}
+				width={width + 2}
+				wrap={false}
+				>
 				{
 					getRange(lines).map((line, y) => {
 						const isActive = y === active - offset;

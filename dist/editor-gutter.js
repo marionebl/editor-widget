@@ -17,6 +17,10 @@ var _react2 = _interopRequireDefault(_react);
 
 var _fp = require('lodash/fp');
 
+var _autobindDecorator = require('autobind-decorator');
+
+var _autobindDecorator2 = _interopRequireDefault(_autobindDecorator);
+
 var _pureRenderDecorator = require('pure-render-decorator');
 
 var _pureRenderDecorator2 = _interopRequireDefault(_pureRenderDecorator);
@@ -41,7 +45,7 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-var EditorGutter = (0, _pureRenderDecorator2.default)(_class = (0, _deepDefaults2.default)(_class = (_temp = _class2 = function (_Component) {
+var EditorGutter = (0, _pureRenderDecorator2.default)(_class = (0, _deepDefaults2.default)(_class = (0, _autobindDecorator2.default)(_class = (_temp = _class2 = function (_Component) {
 	_inherits(EditorGutter, _Component);
 
 	function EditorGutter() {
@@ -51,6 +55,20 @@ var EditorGutter = (0, _pureRenderDecorator2.default)(_class = (0, _deepDefaults
 	}
 
 	_createClass(EditorGutter, [{
+		key: 'componentDidMount',
+		value: function componentDidMount() {
+			var node = this.node;
+
+			if (node) {
+				node.setIndex(1);
+			}
+		}
+	}, {
+		key: 'saveNode',
+		value: function saveNode(ref) {
+			this.node = ref;
+		}
+	}, {
 		key: 'render',
 		value: function render(props) {
 			var lines = props.lines;
@@ -67,8 +85,13 @@ var EditorGutter = (0, _pureRenderDecorator2.default)(_class = (0, _deepDefaults
 
 			return _react2.default.createElement(
 				'box',
-				_extends({}, other, { wrap: false }),
+				_extends({}, other, {
+					ref: this.saveNode,
+					width: width + 2,
+					wrap: false
+				}),
 				getRange(lines).map(function (line, y) {
+					var isActive = y === active - offset;
 					return _react2.default.createElement(
 						_editorGutterLine2.default,
 						{
@@ -77,7 +100,7 @@ var EditorGutter = (0, _pureRenderDecorator2.default)(_class = (0, _deepDefaults
 							activeStyle: activeStyle,
 							top: y,
 							key: y,
-							active: y === active - offset,
+							active: isActive,
 							currentLine: style.currentLine
 						},
 						String(line)
@@ -108,7 +131,7 @@ var EditorGutter = (0, _pureRenderDecorator2.default)(_class = (0, _deepDefaults
 	active: -1,
 	offset: 0,
 	width: 6
-}, _temp)) || _class) || _class;
+}, _temp)) || _class) || _class) || _class;
 
 exports.EditorGutter = EditorGutter;
 exports.default = EditorGutter;
