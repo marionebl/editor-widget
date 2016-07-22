@@ -65,6 +65,7 @@ export class Editor extends Component {
 			t.bool,
 			t.shape(EditorGutter.propTypes)
 		]),
+		multiline: t.bool,
 		keyBindings: t.shape({
 			goLeft: t.arrayOf(t.string),
 			goLeftWord: t.arrayOf(t.string),
@@ -89,6 +90,7 @@ export class Editor extends Component {
 			y: 0
 		},
 		gutter: false,
+		multiline: true,
 		onNavigation: noop,
 		onEdit: noop,
 		onGoUp: noop,
@@ -244,6 +246,11 @@ export class Editor extends Component {
 
 	handleNewLine() {
 		const {props} = this;
+
+		if (props.multiline === false) {
+			return;
+		}
+
 		props.onNewLine(props);
 	}
 
@@ -292,24 +299,36 @@ export class Editor extends Component {
 			cursor,
 			gutter,
 			children,
+			multiline,
 			...other
 		} = props;
 
 		const {
 			width,
-			height
+			height: measuredHeight
 		} = state;
 
-		const matrix = getMatrix(children);
-		const matrixCursorLine = getMatrixLine(matrix, cursor.y);
+		screen.log({
+			cursor,
+			gutter,
+			children,
+			multiline
+		});
+
+		const height = multiline ? measuredHeight : 1;
+		const matrix = multiline ? getMatrix(children) : [getMatrix(children)[0]];
+		const matrixCursorLine = multiline ? getMatrixLine(matrix, cursor.y) : getMatrixLine(matrix, 0);
+
 		const gutterWidth = getGutterWidth(gutter, matrix.length);
 		const gutterOffsetX = gutterWidth > 0 ? gutterWidth + 2 : 0;
-
-		const cursorY = clamp(cursor.y, 0, Math.min(height - 1, matrix.length));
 		const cursorX = clamp(cursor.x, 0, Math.min(width - gutterOffsetX - 1, matrixCursorLine.length));
-		const scrollY = clamp(cursor.y - height + 1, 0, matrix.length);
+		const cursorY = multiline ? clamp(cursor.y, 0, Math.min(height - 1, matrix.length)) : 0;
+		const scrollY = multiline ? clamp(cursor.y - height + 1, 0, matrix.length) : 0;
 		const scrollX = clamp(cursor.x - width + 1 + gutterOffsetX, 0, matrixCursorLine.length);
-		const active = focus ? cursor.y : -1;
+
+		const activeLine = multiline ? cursor.y : 0;
+		const active = focus ? activeLine : -1;
+		const lines = Math.min(height, matrix.length);
 
 		return (
 			<box
@@ -323,7 +342,7 @@ export class Editor extends Component {
 							width={gutterWidth}
 							{...gutter}
 							offset={scrollY}
-							lines={height}
+							lines={lines}
 							active={active}
 							/>
 				}

@@ -10,6 +10,7 @@
     "build": "rm -rf ./dist && babel ./src --out-dir ./dist",
     "test": "eslint src && ava",
     "examples:basic": "babel-live ./src/examples/basic.js",
+    "examples:input": "babel-live ./src/examples/input.js",
     "examples:basic:fastboot": "node dist/examples/basic.js"
   },
   "repository": {
