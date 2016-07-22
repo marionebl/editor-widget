@@ -308,13 +308,6 @@ export class Editor extends Component {
 			height: measuredHeight
 		} = state;
 
-		screen.log({
-			cursor,
-			gutter,
-			children,
-			multiline
-		});
-
 		const height = multiline ? measuredHeight : 1;
 		const matrix = multiline ? getMatrix(children) : [getMatrix(children)[0]];
 		const matrixCursorLine = multiline ? getMatrixLine(matrix, cursor.y) : getMatrixLine(matrix, 0);

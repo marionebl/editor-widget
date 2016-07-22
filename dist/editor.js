@@ -240,6 +240,11 @@ var Editor = exports.Editor = (0, _pureRenderDecorator2.default)(_class = (0, _d
 		value: function handleNewLine() {
 			var props = this.props;
 
+
+			if (props.multiline === false) {
+				return;
+			}
+
 			props.onNewLine(props);
 		}
 	}, {
@@ -295,23 +300,28 @@ var Editor = exports.Editor = (0, _pureRenderDecorator2.default)(_class = (0, _d
 			var cursor = props.cursor;
 			var gutter = props.gutter;
 			var children = props.children;
+			var multiline = props.multiline;
 
-			var other = _objectWithoutProperties(props, ['focus', 'cursor', 'gutter', 'children']);
+			var other = _objectWithoutProperties(props, ['focus', 'cursor', 'gutter', 'children', 'multiline']);
 
 			var width = state.width;
-			var height = state.height;
+			var measuredHeight = state.height;
 
 
-			var matrix = (0, _getMatrix2.default)(children);
-			var matrixCursorLine = (0, _getMatrixLine2.default)(matrix, cursor.y);
+			var height = multiline ? measuredHeight : 1;
+			var matrix = multiline ? (0, _getMatrix2.default)(children) : [(0, _getMatrix2.default)(children)[0]];
+			var matrixCursorLine = multiline ? (0, _getMatrixLine2.default)(matrix, cursor.y) : (0, _getMatrixLine2.default)(matrix, 0);
+
 			var gutterWidth = getGutterWidth(gutter, matrix.length);
 			var gutterOffsetX = gutterWidth > 0 ? gutterWidth + 2 : 0;
-
-			var cursorY = (0, _lodash.clamp)(cursor.y, 0, Math.min(height - 1, matrix.length));
 			var cursorX = (0, _lodash.clamp)(cursor.x, 0, Math.min(width - gutterOffsetX - 1, matrixCursorLine.length));
-			var scrollY = (0, _lodash.clamp)(cursor.y - height + 1, 0, matrix.length);
+			var cursorY = multiline ? (0, _lodash.clamp)(cursor.y, 0, Math.min(height - 1, matrix.length)) : 0;
+			var scrollY = multiline ? (0, _lodash.clamp)(cursor.y - height + 1, 0, matrix.length) : 0;
 			var scrollX = (0, _lodash.clamp)(cursor.x - width + 1 + gutterOffsetX, 0, matrixCursorLine.length);
-			var active = focus ? cursor.y : -1;
+
+			var activeLine = multiline ? cursor.y : 0;
+			var active = focus ? activeLine : -1;
+			var lines = Math.min(height, matrix.length);
 
 			return _react2.default.createElement(
 				'box',
@@ -323,7 +333,7 @@ var Editor = exports.Editor = (0, _pureRenderDecorator2.default)(_class = (0, _d
 					width: gutterWidth
 				}, gutter, {
 					offset: scrollY,
-					lines: height,
+					lines: lines,
 					active: active
 				})),
 				_react2.default.createElement(
@@ -371,6 +381,7 @@ var Editor = exports.Editor = (0, _pureRenderDecorator2.default)(_class = (0, _d
 		style: _react.PropTypes.any
 	})]),
 	gutter: _react.PropTypes.oneOfType([_react.PropTypes.bool, _react.PropTypes.shape(_editorGutter2.default.propTypes)]),
+	multiline: _react.PropTypes.bool,
 	keyBindings: _react.PropTypes.shape({
 		goLeft: _react.PropTypes.arrayOf(_react.PropTypes.string),
 		goLeftWord: _react.PropTypes.arrayOf(_react.PropTypes.string),
@@ -393,6 +404,7 @@ var Editor = exports.Editor = (0, _pureRenderDecorator2.default)(_class = (0, _d
 		y: 0
 	},
 	gutter: false,
+	multiline: true,
 	onNavigation: _fp.noop,
 	onEdit: _fp.noop,
 	onGoUp: _fp.noop,
