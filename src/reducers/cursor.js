@@ -7,6 +7,12 @@ import getMatrixWord from '../utilities/get-matrix-word';
 
 const clampPositive = clamp(0);
 
+function normalizeCursorPosition(position) {
+	return typeof position === 'number' && isNaN(position) === false ?
+		position :
+		0;
+}
+
 export function createCursorReducer(ident) {
 	const actions = createActions(ident);
 
@@ -15,7 +21,9 @@ export function createCursorReducer(ident) {
 			return state;
 		}
 
-		const {x, y} = state;
+		const x = normalizeCursorPosition(state.x);
+		const y = normalizeCursorPosition(state.y);
+
 		const {content = '', cursor} = action.payload;
 		const matrix = getMatrix(content);
 		const matrixLine = getMatrixLine(matrix, y);

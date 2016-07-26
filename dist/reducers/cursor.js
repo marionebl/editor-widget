@@ -30,6 +30,10 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 var clampPositive = (0, _fp.clamp)(0);
 
+function normalizeCursorPosition(position) {
+	return typeof position === 'number' && isNaN(position) === false ? position : 0;
+}
+
 function createCursorReducer(ident) {
 	var actions = (0, _actions2.default)(ident);
 
@@ -41,8 +45,9 @@ function createCursorReducer(ident) {
 			return state;
 		}
 
-		var x = state.x;
-		var y = state.y;
+		var x = normalizeCursorPosition(state.x);
+		var y = normalizeCursorPosition(state.y);
+
 		var _action$payload = action.payload;
 		var _action$payload$conte = _action$payload.content;
 		var content = _action$payload$conte === undefined ? '' : _action$payload$conte;

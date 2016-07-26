@@ -148,15 +148,32 @@ export class Editor extends Component {
 	}
 
 	componentDidMount() {
-		const {node} = this;
-		if (node) {
-			node.enableKeys();
-			this.setState({
-				width: node.width,
-				height: node.height
-			});
-			node.screen.on('resize', this.handleScreenResize);
+		const {node, props} = this;
+
+		if (!node) {
+			return this;
 		}
+
+		if (props.focus) {
+			node.enableKeys();
+		}
+
+		this.handleScreenResize();
+		node.screen.on('resize', this.handleScreenResize);
+	}
+
+	componentWillReceiveProps() {
+		const {node, props} = this;
+
+		if (!node) {
+			return this;
+		}
+
+		if (props.focus) {
+			node.enableKeys();
+		}
+
+		this.handleScreenResize();
 	}
 
 	componentWillUnmount() {
@@ -314,10 +331,10 @@ export class Editor extends Component {
 
 		const gutterWidth = getGutterWidth(gutter, matrix.length);
 		const gutterOffsetX = gutterWidth > 0 ? gutterWidth + 2 : 0;
-		const cursorX = clamp(cursor.x, 0, Math.min(width - gutterOffsetX - 1, matrixCursorLine.length));
+		const cursorX = clamp(cursor.x, 0, Math.min(width - gutterOffsetX, matrixCursorLine.length));
 		const cursorY = multiline ? clamp(cursor.y, 0, Math.min(height - 1, matrix.length)) : 0;
 		const scrollY = multiline ? clamp(cursor.y - height + 1, 0, matrix.length) : 0;
-		const scrollX = clamp(cursor.x - width + 1 + gutterOffsetX, 0, matrixCursorLine.length);
+		const scrollX = multiline ? clamp(cursor.x - width + 1 + gutterOffsetX, 0, matrixCursorLine.length) : 0;
 
 		const activeLine = multiline ? cursor.y : 0;
 		const active = focus ? activeLine : -1;

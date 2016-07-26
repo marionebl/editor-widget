@@ -130,15 +130,36 @@ var Editor = exports.Editor = (0, _pureRenderDecorator2.default)(_class = (0, _d
 		key: 'componentDidMount',
 		value: function componentDidMount() {
 			var node = this.node;
+			var props = this.props;
 
-			if (node) {
-				node.enableKeys();
-				this.setState({
-					width: node.width,
-					height: node.height
-				});
-				node.screen.on('resize', this.handleScreenResize);
+
+			if (!node) {
+				return this;
 			}
+
+			if (props.focus) {
+				node.enableKeys();
+			}
+
+			this.handleScreenResize();
+			node.screen.on('resize', this.handleScreenResize);
+		}
+	}, {
+		key: 'componentWillReceiveProps',
+		value: function componentWillReceiveProps() {
+			var node = this.node;
+			var props = this.props;
+
+
+			if (!node) {
+				return this;
+			}
+
+			if (props.focus) {
+				node.enableKeys();
+			}
+
+			this.handleScreenResize();
 		}
 	}, {
 		key: 'componentWillUnmount',
@@ -314,10 +335,10 @@ var Editor = exports.Editor = (0, _pureRenderDecorator2.default)(_class = (0, _d
 
 			var gutterWidth = getGutterWidth(gutter, matrix.length);
 			var gutterOffsetX = gutterWidth > 0 ? gutterWidth + 2 : 0;
-			var cursorX = (0, _lodash.clamp)(cursor.x, 0, Math.min(width - gutterOffsetX - 1, matrixCursorLine.length));
+			var cursorX = (0, _lodash.clamp)(cursor.x, 0, Math.min(width - gutterOffsetX, matrixCursorLine.length));
 			var cursorY = multiline ? (0, _lodash.clamp)(cursor.y, 0, Math.min(height - 1, matrix.length)) : 0;
 			var scrollY = multiline ? (0, _lodash.clamp)(cursor.y - height + 1, 0, matrix.length) : 0;
-			var scrollX = (0, _lodash.clamp)(cursor.x - width + 1 + gutterOffsetX, 0, matrixCursorLine.length);
+			var scrollX = multiline ? (0, _lodash.clamp)(cursor.x - width + 1 + gutterOffsetX, 0, matrixCursorLine.length) : 0;
 
 			var activeLine = multiline ? cursor.y : 0;
 			var active = focus ? activeLine : -1;
