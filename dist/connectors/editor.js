@@ -40,7 +40,8 @@ function createEditorMapProps(ident) {
 			children: subState.contents,
 			focus: subState.focus,
 			cursor: subState.cursor,
-			gutter: subState.gutter
+			gutter: subState.gutter,
+			highlight: subState.highlight
 		}, propMapper);
 
 		return ident ? _defineProperty({}, ident, mapping) : mapping;

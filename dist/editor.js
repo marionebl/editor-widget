@@ -11,6 +11,8 @@ var _createClass = function () { function defineProperties(target, props) { for 
 
 var _class, _class2, _temp2;
 
+var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
+
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
 
 var _react = require('react');
@@ -20,6 +22,10 @@ var _react2 = _interopRequireDefault(_react);
 var _autobindDecorator = require('autobind-decorator');
 
 var _autobindDecorator2 = _interopRequireDefault(_autobindDecorator);
+
+var _emphasize = require('emphasize');
+
+var _emphasize2 = _interopRequireDefault(_emphasize);
 
 var _pureRenderDecorator = require('pure-render-decorator');
 
@@ -67,6 +73,8 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
+var GIT_SEPARATOR = '------------------------ >8 ------------------------\n';
+
 function getGutterWidth(gutter, lineCount) {
 	// Gutter is hidden
 	if (gutter === false) {
@@ -80,6 +88,45 @@ function getGutterWidth(gutter, lineCount) {
 
 	// Determine based on line number width
 	return String(lineCount).length + 1;
+}
+
+function applyHighlight(language, content) {
+	// Automatic highlighting
+	if (language === true) {
+		return _emphasize2.default.highlightAuto(content).value;
+	}
+
+	// Hard coded syntax
+	if (typeof language === 'string') {
+		if (language === 'git') {
+			var fragments = content.split(GIT_SEPARATOR);
+
+			if (fragments.length < 2) {
+				return _emphasize2.default.highlight('bash', content).value;
+			}
+
+			var _fragments = _slicedToArray(fragments, 2);
+
+			var _fragments$ = _fragments[0];
+			var commentary = _fragments$ === undefined ? '' : _fragments$;
+			var _fragments$2 = _fragments[1];
+			var diff = _fragments$2 === undefined ? '' : _fragments$2;
+
+
+			var result = [_emphasize2.default.highlight('bash', '' + commentary + GIT_SEPARATOR).value, diff.split('\n').map(function (line) {
+				if (line[0] === '#') {
+					return _emphasize2.default.highlight('bash', line || '').value;
+				}
+				return _emphasize2.default.highlight('diff', line || '').value;
+			}).join('\n')].join('');
+
+			return result;
+		}
+
+		return _emphasize2.default.highlight(language, content).value;
+	}
+
+	return content;
 }
 
 var Editor = exports.Editor = (0, _pureRenderDecorator2.default)(_class = (0, _deepDefaults2.default)(_class = (0, _autobindDecorator2.default)(_class = (_temp2 = _class2 = function (_Component) {
@@ -318,16 +365,19 @@ var Editor = exports.Editor = (0, _pureRenderDecorator2.default)(_class = (0, _d
 		key: 'render',
 		value: function render(props, state) {
 			var focus = props.focus;
+			var highlight = props.highlight;
 			var cursor = props.cursor;
 			var gutter = props.gutter;
 			var children = props.children;
 			var multiline = props.multiline;
 
-			var other = _objectWithoutProperties(props, ['focus', 'cursor', 'gutter', 'children', 'multiline']);
+			var other = _objectWithoutProperties(props, ['focus', 'highlight', 'cursor', 'gutter', 'children', 'multiline']);
 
 			var width = state.width;
 			var measuredHeight = state.height;
 
+
+			var content = applyHighlight(highlight, children);
 
 			var height = multiline ? measuredHeight : 1;
 			var matrix = multiline ? (0, _getMatrix2.default)(children) : [(0, _getMatrix2.default)(children)[0]];
@@ -365,7 +415,7 @@ var Editor = exports.Editor = (0, _pureRenderDecorator2.default)(_class = (0, _d
 						maxY: height,
 						left: gutterOffsetX
 					},
-					children
+					content
 				),
 				focus && cursor && _react2.default.createElement(_editorCursor2.default, {
 					matrix: matrix,
@@ -381,6 +431,7 @@ var Editor = exports.Editor = (0, _pureRenderDecorator2.default)(_class = (0, _d
 }(_react.Component), _class2.propTypes = {
 	children: _react.PropTypes.string,
 	focus: _react.PropTypes.bool,
+	highlight: _react.PropTypes.oneOfType([_react.PropTypes.bool, _react.PropTypes.string]),
 	onNavigation: _react.PropTypes.func.isRequired,
 	onEdit: _react.PropTypes.func.isRequired,
 	onGoUp: _react.PropTypes.func.isRequired,
@@ -420,6 +471,7 @@ var Editor = exports.Editor = (0, _pureRenderDecorator2.default)(_class = (0, _d
 }, _class2.defaultProps = {
 	children: '',
 	focus: false,
+	highlight: false,
 	cursor: {
 		x: 0,
 		y: 0

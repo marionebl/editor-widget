@@ -14,6 +14,8 @@ import EditorBuffer from './editor-buffer';
 import EditorCursor from './editor-cursor';
 import EditorGutter from './editor-gutter';
 
+const GIT_SEPARATOR = '------------------------ >8 ------------------------\n';
+
 function getGutterWidth(gutter, lineCount) {
 	// Gutter is hidden
 	if (gutter === false) {
@@ -37,6 +39,33 @@ function applyHighlight(language, content) {
 
 	// Hard coded syntax
 	if (typeof language === 'string') {
+		if (language === 'git') {
+			const fragments = content.split(GIT_SEPARATOR);
+
+			if (fragments.length < 2) {
+				return content;
+			}
+
+			const [
+				commentary = '',
+				diff = ''
+			] = fragments;
+
+			const result = [
+				emphasize.highlight('bash', `${commentary}${GIT_SEPARATOR}`).value,
+				diff.split('\n')
+					.map(line => {
+						if (line[0] === '#') {
+							return emphasize.highlight('bash', line || '').value;
+						}
+						return emphasize.highlight('diff', line || '').value;
+					})
+					.join('\n')
+			].join('');
+
+			return result;
+		}
+
 		return emphasize.highlight(language, content).value;
 	}
 

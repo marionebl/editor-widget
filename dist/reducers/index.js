@@ -31,6 +31,11 @@ function createEditorReducers(ident) {
 
 			return state;
 		},
+		highlight: function highlight() {
+			var state = arguments.length <= 0 || arguments[0] === undefined ? false : arguments[0];
+
+			return state;
+		},
 
 		cursor: (0, _cursor2.default)(ident),
 		contents: (0, _contents2.default)(ident)
