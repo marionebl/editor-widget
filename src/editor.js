@@ -1,5 +1,6 @@
 import React, {Component, PropTypes as t} from 'react';
 import autobind from 'autobind-decorator';
+import emphasize from 'emphasize';
 import pure from 'pure-render-decorator';
 import {clamp} from 'lodash';
 import {noop} from 'lodash/fp';
@@ -28,6 +29,20 @@ function getGutterWidth(gutter, lineCount) {
 	return String(lineCount).length + 1;
 }
 
+function applyHighlight(language, content) {
+	// Automatic highlighting
+	if (language === true) {
+		return emphasize.highlightAuto(content).value;
+	}
+
+	// Hard coded syntax
+	if (typeof language === 'string') {
+		return emphasize.highlight(language, content).value;
+	}
+
+	return content;
+}
+
 @pure
 @deep
 @autobind
@@ -38,6 +53,7 @@ export class Editor extends Component {
 	static propTypes = {
 		children: t.string,
 		focus: t.bool,
+		highlight: t.oneOfType([t.bool, t.string]),
 		onNavigation: t.func.isRequired,
 		onEdit: t.func.isRequired,
 		onGoUp: t.func.isRequired,
@@ -85,6 +101,7 @@ export class Editor extends Component {
 	static defaultProps = {
 		children: '',
 		focus: false,
+		highlight: false,
 		cursor: {
 			x: 0,
 			y: 0
@@ -313,6 +330,7 @@ export class Editor extends Component {
 	render(props, state) {
 		const {
 			focus,
+			highlight,
 			cursor,
 			gutter,
 			children,
@@ -324,6 +342,8 @@ export class Editor extends Component {
 			width,
 			height: measuredHeight
 		} = state;
+
+		const content = applyHighlight(highlight, children);
 
 		const height = multiline ? measuredHeight : 1;
 		const matrix = multiline ? getMatrix(children) : [getMatrix(children)[0]];
@@ -363,7 +383,7 @@ export class Editor extends Component {
 						maxY={height}
 						left={gutterOffsetX}
 						>
-						{children}
+						{content}
 					</EditorBuffer>
 				}
 				{

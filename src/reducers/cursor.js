@@ -21,8 +21,9 @@ export function createCursorReducer(ident) {
 			return state;
 		}
 
-		const x = normalizeCursorPosition(state.x);
-		const y = normalizeCursorPosition(state.y);
+		const {x, y} = state;
+		// const x = normalizeCursorPosition(state.x);
+		// const y = normalizeCursorPosition(state.y);
 
 		const {content = '', cursor} = action.payload;
 		const matrix = getMatrix(content);

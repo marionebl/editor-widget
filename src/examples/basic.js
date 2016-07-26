@@ -27,6 +27,7 @@ function getStore(reducers, contents, screen) {
 		contents,
 		focus: true,
 		gutter: true,
+		highlight: 'js',
 		cursor: {
 			x: 0,
 			y: 0

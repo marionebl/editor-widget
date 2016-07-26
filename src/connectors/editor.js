@@ -17,6 +17,7 @@ export function createEditorMapProps(ident, propMapper = {}) {
 			focus: subState.focus,
 			cursor: subState.cursor,
 			gutter: subState.gutter,
+			highlight: subState.highlight,
 			...propMapper
 		};
 

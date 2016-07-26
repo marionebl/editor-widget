@@ -10,6 +10,9 @@ export function createEditorReducers(ident) {
 		focus(state = false) {
 			return state;
 		},
+		highlight(state = false) {
+			return state;
+		},
 		cursor: createCursorReducer(ident),
 		contents: createContentsReducer(ident)
 	};
