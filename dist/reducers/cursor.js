@@ -45,10 +45,8 @@ function createCursorReducer(ident) {
 			return state;
 		}
 
-		var x = state.x;
-		var y = state.y;
-		// const x = normalizeCursorPosition(state.x);
-		// const y = normalizeCursorPosition(state.y);
+		var x = normalizeCursorPosition(state.x);
+		var y = normalizeCursorPosition(state.y);
 
 		var _action$payload = action.payload;
 		var _action$payload$conte = _action$payload.content;

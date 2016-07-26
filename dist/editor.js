@@ -102,7 +102,7 @@ function applyHighlight(language, content) {
 			var fragments = content.split(GIT_SEPARATOR);
 
 			if (fragments.length < 2) {
-				return _emphasize2.default.highlight('bash', content).value;
+				return content;
 			}
 
 			var _fragments = _slicedToArray(fragments, 2);
